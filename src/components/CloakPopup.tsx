@@ -29,8 +29,8 @@ export function CloakPopup({
 
   useEffect(() => {
     // Initialize state with the provided settings when the popup is opened
-    setIconUrlInput(settings.iconUrl); // Only store the raw input
-    setIconUrlPreview(settings.iconUrl); // Used for previewing
+    setIconUrlInput(settings.iconUrl);
+    setIconUrlPreview(settings.iconUrl);
     setPageTitle(settings.pageTitle);
     setError('');
   }, [settings]);
@@ -41,21 +41,20 @@ export function CloakPopup({
   };
 
   const handleIconChange = (input: string) => {
-    setIconUrlInput(input); // Always save the raw input
+    setIconUrlInput(input);
     setError('');
-  
+
     if (!input) {
-      setIconUrlPreview(''); // Clear the preview if input is empty
+      setIconUrlPreview('');
       return;
     }
-  
-    // Check if the input is already a URL
+
     const isFullUrl = input.startsWith('http://') || input.startsWith('https://');
     const previewUrl = isFullUrl ? input : generateFaviconUrl(input);
-  
+
     setIconUrlPreview(previewUrl);
     setIsLoading(true);
-  
+
     const img = new Image();
     img.src = previewUrl;
     img.onload = () => {
@@ -67,12 +66,22 @@ export function CloakPopup({
       setIsLoading(false);
     };
   };
-  
 
   const handleSave = () => {
     if (error) return;
 
-    // Save the settings using the raw input and join the URLs where needed
+    // Update the tab's favicon and title
+    const faviconElement = document.querySelector("link[rel='icon']") as HTMLLinkElement || document.createElement('link');
+    faviconElement.rel = 'icon';
+    faviconElement.href = iconUrlPreview || '/favicon.ico';
+
+    if (!faviconElement.parentNode) {
+      document.head.appendChild(faviconElement);
+    }
+
+    document.title = pageTitle || 'KittenGames';
+
+    // Save the settings using the raw input
     onUpdateCloak({ iconUrl: iconUrlInput, pageTitle });
     onClose();
   };
@@ -124,7 +133,7 @@ export function CloakPopup({
                 type="text"
                 className={`w-full bg-gray-800 text-gray-300 px-4 py-3 rounded-lg border 
                 ${error ? 'border-red-500' : 'border-gray-700 focus:ring-blue-500'}`}
-                value={iconUrlInput} // Always use the raw input
+                value={iconUrlInput}
                 onChange={(e) => handleIconChange(e.target.value)}
                 placeholder="Enter domain (e.g., som.today)"
               />
