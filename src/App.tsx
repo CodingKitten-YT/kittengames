@@ -19,7 +19,7 @@ function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isCloakOpen, setIsCloakOpen] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
-  
+
   const { settings, updateSettings, loadCustomTheme, removeCustomTheme, customThemes } = useSettings();
   const { cloakSettings, updateCloak, removeCloak } = useCloaking();
   const { 
@@ -80,6 +80,7 @@ function App() {
         name={selectedGame.name}
         url={selectedGame.url}
         onBack={handleBack}
+        openRandomGame={openRandomGame} // Pass the function here
       />
     );
   }
@@ -103,7 +104,7 @@ function App() {
             </div>
             <div className="flex items-center gap-3">
               <button
-                onClick={openRandomGame}
+                onClick={openRandomGame} // Trigger random game from homepage
                 className="p-2 hover:bg-card-hover rounded-lg transition-all duration-300 
                          hover:scale-110 hover:shadow-lg group"
                 aria-label="Random Game"

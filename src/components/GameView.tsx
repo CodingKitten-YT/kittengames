@@ -1,13 +1,14 @@
 import React from 'react';
-import { ChevronLeft, Maximize2, ExternalLink } from 'lucide-react';
+import { ChevronLeft, Maximize2, ExternalLink, Dices } from 'lucide-react';
 
 interface GameViewProps {
   name: string;
   url: string;
   onBack: () => void;
+  openRandomGame: () => void; // Add openRandomGame prop
 }
 
-export function GameView({ name, url, onBack }: GameViewProps) {
+export function GameView({ name, url, onBack, openRandomGame }: GameViewProps) {
   const handleFullscreen = () => {
     const iframe = document.getElementById('game-iframe') as HTMLIFrameElement;
     if (iframe) {
@@ -64,6 +65,17 @@ export function GameView({ name, url, onBack }: GameViewProps) {
             aria-label="Open in new tab"
           >
             <ExternalLink 
+              className="text-muted group-hover:text-primary transition-colors duration-300" 
+              size={20} 
+            />
+          </button>
+          <button
+            onClick={openRandomGame} // Add random game button here
+            className="p-2 hover:bg-card-hover rounded-lg transition-all duration-300 
+                     hover:scale-110 hover:shadow-lg group"
+            aria-label="Random Game"
+          >
+            <Dices 
               className="text-muted group-hover:text-primary transition-colors duration-300" 
               size={20} 
             />
