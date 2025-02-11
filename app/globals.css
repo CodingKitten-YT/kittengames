@@ -1,0 +1,179 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 20 20 20;
+  --foreground: 250 250 250;
+  --accent: 139 92 246;
+}
+
+body {
+  color: rgb(var(--foreground));
+  background: radial-gradient(circle at top left, rgba(var(--accent), 0.15), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(var(--accent), 0.15), transparent 40%), rgb(var(--background));
+  min-height: 100vh;
+}
+
+@layer utilities {
+  .glassmorphism {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-lg;
+  }
+
+  .glassmorphism-dark {
+    @apply bg-gray-900/70 backdrop-blur-md border border-gray-700/50 shadow-lg;
+  }
+
+  .glassmorphism.rounded-full,
+  .glassmorphism-dark.rounded-full {
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.game-card {
+  transform-style: preserve-3d;
+  transform: perspective(1000px);
+}
+
+.game-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.06), transparent 40%);
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.game-card:hover::before {
+  opacity: 1;
+}
+
+.game-card > * {
+  transform: translateZ(50px);
+}
+
+.game-card:hover img {
+  filter: brightness(0.5) contrast(1.2);
+}
+
+.game-card h3,
+.game-card .text-white {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Add hover effect for the back button */
+button:hover .w-6 {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dropdownItemFade {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.game-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.game-card img {
+  transition: filter 0.3s ease-out;
+}
+
+.game-card:hover img {
+  filter: brightness(0.7);
+}
+
+/* Improve responsiveness */
+@media (max-width: 640px) {
+  .game-card h3 {
+    font-size: 1rem;
+  }
+}
+
+/* Smooth scrolling for the entire page */
+html {
+  scroll-behavior: smooth;
+}
+
+.category-button {
+  transition: color 0.3s ease;
+}
+
+.category-button:hover {
+  color: theme("colors.purple.400");
+}
+
+/* Styles for TabCustomizationPopup */
+.tab-customization-popup {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.tab-customization-popup.entering,
+.tab-customization-popup.exiting {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.tab-customization-popup.entered {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Enhanced preview styles */
+.tab-preview {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.3s ease;
+}
+
+.tab-preview:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.tab-preview-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tab-preview-content {
+  background-image: linear-gradient(45deg, #2c2c2c 25%, transparent 25%, transparent 75%, #2c2c2c 75%, #2c2c2c),
+    linear-gradient(45deg, #2c2c2c 25%, transparent 25%, transparent 75%, #2c2c2c 75%, #2c2c2c);
+  background-size: 10px 10px;
+  background-position: 0 0, 5px 5px;
+}
+
+.content-fade {
+  transition: opacity 0.35s ease-in-out, width 0.35s ease-in-out, padding 0.35s ease-in-out;
+}
+
