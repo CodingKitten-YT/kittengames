@@ -6,8 +6,7 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
   title: "KittenGames",
-  description: "Play awesome games on KittenGames!",
-    generator: 'v0.dev'
+  description: "Unblocked games without ads."
 }
 
 export default function RootLayout({

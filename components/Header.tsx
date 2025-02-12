@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
-import { Cat, ChevronDown, ArrowLeft, EyeOff, Maximize2 } from "lucide-react"
+import { Cat, ChevronDown, ArrowLeft, EyeOff, Maximize2, MessageCirclePlus } from "lucide-react"
 import SearchBar from "./SearchBar"
 import CategoryDropdown from "./CategoryDropdown"
 import TabCustomizationPopup from "./TabCustomizationPopup"
@@ -64,16 +64,18 @@ export default function Header({
   return (
     <>
       <header
-        className={`
-          fixed top-4 z-40
-          ${isCompact ? "left-4" : "left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl"}
-        `}
+        className={
+          `fixed top-4 z-40 ${
+            isCompact ? "left-4" : "left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl"
+          }`
+        }
       >
         <div
-          className={`
-            glassmorphism-dark rounded-full flex items-center justify-between
-            ${isCompact ? "px-2 py-2" : "px-6 py-3 w-full"}
-          `}
+          className={
+            `glassmorphism-dark rounded-full flex items-center justify-between ${
+              isCompact ? "px-2 py-2" : "px-6 py-3 w-full"
+            }`
+          }
         >
           <div className="flex items-center space-x-3">
             {isCompact ? (
@@ -95,6 +97,17 @@ export default function Header({
           </div>
           {!isCompact && (
             <div className="flex items-center space-x-4">
+              {/* New Button */}
+              <a
+                href="https://app.formbricks.com/s/cm6ui6jwh0000jj03onw8dfr7"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white hover:text-purple-400 transition-colors duration-300"
+                title="Request games/features"
+              >
+                <MessageCirclePlus className="w-6 h-6" />
+              </a>
+
               <button
                 onClick={() => setIsTabCustomizationOpen(true)}
                 className="text-white hover:text-purple-400 transition-colors duration-300"
@@ -147,4 +160,3 @@ export default function Header({
     </>
   )
 }
-

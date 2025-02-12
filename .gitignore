@@ -135,5 +135,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+# next
+.next/
 
 node_modules/@next/swc-linux-x64-gnu/next-swc.linux-x64-gnu.node

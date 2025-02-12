@@ -33,6 +33,8 @@ body {
 .game-card {
   transform-style: preserve-3d;
   transform: perspective(1000px);
+  border-radius: 0.5rem; /* Add rounded corners */
+  overflow: hidden; /* Ensure content doesn't overflow rounded corners */
 }
 
 .game-card::before {

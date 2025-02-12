@@ -57,7 +57,7 @@ function GameCard({ game, onSelect }: { game: any; onSelect: (slug: string) => v
 
   return (
     <div
-      className="game-card glassmorphism-dark rounded-lg overflow-hidden aspect-square relative cursor-pointer group"
+      className="game-card glassmorphism-dark overflow-hidden aspect-square relative cursor-pointer group"
       onClick={() => onSelect(game.name.toLowerCase().replace(/\s+/g, "-"))}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
