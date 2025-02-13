@@ -15,6 +15,125 @@ body {
   min-height: 100vh;
 }
 
+/* Global rounded corners */
+.rounded-global {
+  border-radius: 0.5rem; /* Adjust as needed */
+}
+
+.rounded-global-sm {
+  border-radius: 0.25rem; /* Smaller rounded corners */
+}
+
+.rounded-global-lg {
+  border-radius: 0.75rem; /* Larger rounded corners */
+}
+
+.rounded-global-full {
+  border-radius: 9999px; /* Fully rounded (e.g., for circles) */
+}
+
+/* Slider background */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  @apply h-2 rounded-global bg-gray-700 appearance-none cursor-pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  background: #4a5568;
+  height: 4px;
+  border-radius: 2px;
+  @apply rounded-global bg-gray-700;
+}
+
+input[type="range"]::-moz-range-track {
+  background: #4a5568;
+  height: 4px;
+  border-radius: 2px;
+  @apply rounded-global bg-gray-700;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -6px;
+  background-color: #a78bfa;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  @apply w-4 h-4 rounded-global-full bg-purple-500 opacity-0 transition-opacity duration-200;
+}
+
+input[type="range"]::-moz-range-thumb {
+  border: none;
+  background-color: #a78bfa;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  @apply w-4 h-4 rounded-global-full bg-purple-500 border-none opacity-0 transition-opacity duration-200;
+}
+
+input[type="range"]:focus {
+  outline: none;
+}
+
+input[type="range"]:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.5);
+}
+
+input[type="range"]:focus::-moz-range-thumb {
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.5);
+}
+
+/* Volume slider specific styles */
+.volume-slider {
+  @apply relative flex items-center;
+}
+
+.volume-slider:hover input[type="range"]::-webkit-slider-thumb {
+  @apply opacity-100;
+}
+
+.volume-slider:hover input[type="range"]::-moz-range-thumb {
+  @apply opacity-100;
+}
+
+/* Slider background */
+.slider-background {
+  @apply absolute inset-0 bg-gray-700 rounded-global;
+}
+
+.slider-progress {
+  @apply absolute inset-0 bg-purple-500 rounded-global;
+  width: var(--slider-progress, 0%);
+}
+
+/* Audio popup animation */
+@keyframes audioPopupFade {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.audio-popup-enter {
+  animation: audioPopupFade 0.2s ease-out;
+}
+
+
+body {
+  color: rgb(var(--foreground));
+  background: radial-gradient(circle at top left, rgba(var(--accent), 0.15), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(var(--accent), 0.15), transparent 40%), rgb(var(--background));
+  min-height: 100vh;
+}
+
 @layer utilities {
   .glassmorphism {
     @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-lg;
@@ -33,8 +152,8 @@ body {
 .game-card {
   transform-style: preserve-3d;
   transform: perspective(1000px);
-  border-radius: 0.5rem; /* Add rounded corners */
-  overflow: hidden; /* Ensure content doesn't overflow rounded corners */
+  border-radius: 0.5rem;
+  overflow: hidden;
 }
 
 .game-card::before {
@@ -64,7 +183,6 @@ body {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
-/* Add hover effect for the back button */
 button:hover .w-6 {
   transform: scale(1.1);
   transition: transform 0.2s ease;
@@ -118,14 +236,12 @@ button:hover .w-6 {
   filter: brightness(0.7);
 }
 
-/* Improve responsiveness */
 @media (max-width: 640px) {
   .game-card h3 {
     font-size: 1rem;
   }
 }
 
-/* Smooth scrolling for the entire page */
 html {
   scroll-behavior: smooth;
 }
@@ -138,7 +254,6 @@ html {
   color: theme("colors.purple.400");
 }
 
-/* Styles for TabCustomizationPopup */
 .tab-customization-popup {
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
@@ -154,7 +269,6 @@ html {
   transform: scale(1);
 }
 
-/* Enhanced preview styles */
 .tab-preview {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   transition: box-shadow 0.3s ease;
@@ -179,3 +293,102 @@ html {
   transition: opacity 0.35s ease-in-out, width 0.35s ease-in-out, padding 0.35s ease-in-out;
 }
 
+.drag-handle {
+  cursor: move;
+}
+
+.draggable-header {
+  user-select: none;
+  cursor: move;
+}
+
+.draggable-header * {
+  cursor: move;
+}
+
+/* Styles for volume slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  @apply h-2 rounded-full bg-gray-700 appearance-none cursor-pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  background: #4a5568;
+  height: 4px;
+  border-radius: 2px;
+  @apply rounded-full bg-gray-700;
+}
+
+input[type="range"]::-moz-range-track {
+  background: #4a5568;
+  height: 4px;
+  border-radius: 2px;
+  @apply rounded-full bg-gray-700;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -6px;
+  background-color: #a78bfa;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  -webkit-appearance: none;
+  @apply w-4 h-4 rounded-full bg-purple-500 opacity-0 transition-opacity duration-200;
+}
+
+input[type="range"]::-moz-range-thumb {
+  border: none;
+  background-color: #a78bfa;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  @apply w-4 h-4 rounded-full bg-purple-500 border-none opacity-0 transition-opacity duration-200;
+}
+
+input[type="range"]:focus {
+  outline: none;
+}
+
+input[type="range"]:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.5);
+}
+
+input[type="range"]:focus::-moz-range-thumb {
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.5);
+}
+
+/* Add these styles to the existing globals.css file */
+
+/* Volume slider specific styles */
+.volume-slider {
+  @apply relative flex items-center;
+}
+
+.volume-slider:hover input[type="range"]::-webkit-slider-thumb {
+  @apply opacity-100;
+}
+
+.volume-slider:hover input[type="range"]::-moz-range-thumb {
+  @apply opacity-100;
+}
+
+/* Audio popup animation */
+@keyframes audioPopupFade {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.audio-popup-enter {
+  animation: audioPopupFade 0.2s ease-out;
+}

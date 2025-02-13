@@ -4,7 +4,9 @@ import type React from "react"
 import { Hexagon, Swords, Footprints, Crosshair, PuzzleIcon as PuzzlePiece, Gamepad, Clock, Car } from "lucide-react"
 
 async function getGames() {
-  const res = await fetch("https://raw.githubusercontent.com/CodingKitten-YT/KittenGames-gamelibrary/refs/heads/main/games.json")
+  const res = await fetch(
+    "https://raw.githubusercontent.com/CodingKitten-YT/KittenGames-gamelibrary/refs/heads/main/games.json",
+  )
   if (!res.ok) {
     throw new Error("Failed to fetch games")
   }

@@ -36,7 +36,13 @@ export default function GameFrame({ slug }: { slug: string }) {
 
   return (
     <div className="fixed inset-0 w-full h-full">
-      <iframe id="game-iframe" src={game.url} title={game.name} className="w-full h-full border-0" allowFullScreen />
+      <iframe
+        id="game-iframe"
+        src={game.url}
+        title={game.name}
+        className="w-full h-full border-0 pointer-events-auto"
+        allowFullScreen
+      />
     </div>
   )
 }
