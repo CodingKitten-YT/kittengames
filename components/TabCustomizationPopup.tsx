@@ -124,7 +124,7 @@ export default function TabCustomizationPopup({ isOpen, onClose }: TabCustomizat
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="glassmorphism-dark rounded-global-lg p-6 w-96 shadow-2xl transform transition-all duration-300 ease-out">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-white">Customize Tab Appearance</h2>
+          <h2 className="text-xl font-bold text-white">Cloak your tab</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
             <X className="w-6 h-6" />
           </button>
