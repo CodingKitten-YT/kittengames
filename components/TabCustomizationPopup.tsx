@@ -106,7 +106,7 @@ export default function TabCustomizationPopup({ isOpen, onClose }: TabCustomizat
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="glassmorphism-dark rounded-lg p-6 w-96 shadow-2xl transform transition-all duration-300 ease-out">
+      <div className="glassmorphism-dark rounded-global-lg p-6 w-96 shadow-2xl transform transition-all duration-300 ease-out">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-white">Customize Tab Appearance</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
@@ -122,7 +122,7 @@ export default function TabCustomizationPopup({ isOpen, onClose }: TabCustomizat
               <button
                 type="button"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all duration-300 flex justify-between items-center"
+                className="w-full px-3 py-2 bg-gray-700 text-white rounded-global-sm focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all duration-300 flex justify-between items-center"
               >
                 {selectedPreset.name}
                 <ChevronDown
@@ -130,7 +130,7 @@ export default function TabCustomizationPopup({ isOpen, onClose }: TabCustomizat
                 />
               </button>
               {isDropdownOpen && (
-                <div className="absolute z-10 w-full mt-1 bg-gray-700 rounded-md shadow-lg">
+                <div className="absolute z-10 w-full mt-1 bg-gray-700 rounded-global-sm shadow-lg">
                   {cloakPresets.map((preset) => (
                     <button
                       key={preset.name}
@@ -156,7 +156,8 @@ export default function TabCustomizationPopup({ isOpen, onClose }: TabCustomizat
                   id="tabName"
                   value={tabName}
                   onChange={(e) => setTabName(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all duration-300"
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-global-sm
+                   focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all duration-300"
                 />
               </div>
               <div className="mb-4">
@@ -168,14 +169,14 @@ export default function TabCustomizationPopup({ isOpen, onClose }: TabCustomizat
                   id="tabIcon"
                   value={tabIcon}
                   onChange={(e) => setTabIcon(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all duration-300"
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-global-sm focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all duration-300"
                 />
               </div>
             </>
           )}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-300 mb-2">Preview</label>
-            <div className="bg-gray-800 rounded-md overflow-hidden">
+            <div className="bg-gray-800 rounded-global-sm overflow-hidden">
               <div className="flex items-center space-x-2 bg-gray-900 px-3 py-2">
                 <div className="flex-shrink-0 w-4 h-4 relative">
                   <Image
@@ -197,7 +198,7 @@ export default function TabCustomizationPopup({ isOpen, onClose }: TabCustomizat
           </div>
           <button
             type="submit"
-            className="w-full bg-purple-600 text-white py-2 rounded-md hover:bg-purple-700 transition-colors"
+            className="w-full bg-purple-600 text-white py-2 rounded-global-sm hover:bg-purple-700 transition-colors"
           >
             Apply Changes
           </button>

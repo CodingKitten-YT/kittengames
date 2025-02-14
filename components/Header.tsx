@@ -9,12 +9,10 @@ import {
   EyeOff,
   Maximize2,
   MessageCirclePlus,
-  Volume2,
 } from "lucide-react"
 import SearchBar from "./SearchBar"
 import CategoryDropdown from "./CategoryDropdown"
 import TabCustomizationPopup from "./TabCustomizationPopup"
-import AudioControls from "./AudioControls"
 
 export default function Header({
   isCompact,
@@ -31,13 +29,12 @@ export default function Header({
 }) {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false)
   const [isTabCustomizationOpen, setIsTabCustomizationOpen] = useState(false)
-  const [isAudioOpen, setIsAudioOpen] = useState(false)
   const categoryButtonRef = useRef<HTMLButtonElement>(null)
   const [buttonRect, setButtonRect] = useState<DOMRect | null>(null)
   const [selectedCategory, setSelectedCategory] = useState("All")
   const [position, setPosition] = useState({ x: 16, y: 16 })
   const [isDragging, setIsDragging] = useState(false)
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const dragOffset = useRef({ x: 0, y: 0 })
 
   const handleCategoryClick = () => {
     if (categoryButtonRef.current) {
@@ -57,55 +54,45 @@ export default function Header({
     const savedTabName = localStorage.getItem("cloakedTabName")
     const savedTabIcon = localStorage.getItem("cloakedTabIcon")
 
-    if (savedTabName) {
-      document.title = savedTabName
-    }
+    if (savedTabName) document.title = savedTabName
 
     if (savedTabIcon) {
-      const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement
-      if (favicon) {
-        favicon.href = savedTabIcon
-      } else {
-        const newFavicon = document.createElement("link")
-        newFavicon.rel = "icon"
-        newFavicon.href = savedTabIcon
-        document.head.appendChild(newFavicon)
+      let favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement
+      if (!favicon) {
+        favicon = document.createElement("link")
+        favicon.rel = "icon"
+        document.head.appendChild(favicon)
       }
+      favicon.href = savedTabIcon
     }
   }, [])
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isCompact) {
       setIsDragging(true)
-      setDragOffset({
+      dragOffset.current = {
         x: e.clientX - position.x,
         y: e.clientY - position.y,
-      })
+      }
+      window.addEventListener("mousemove", handleMouseMove)
+      window.addEventListener("mouseup", handleMouseUp)
     }
   }
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (isDragging) {
-      const newX = Math.max(0, Math.min(window.innerWidth - 200, e.clientX - dragOffset.x))
-      const newY = Math.max(0, Math.min(window.innerHeight - 50, e.clientY - dragOffset.y))
-      setPosition({ x: newX, y: newY })
-    }
+    if (!isDragging) return
+
+    setPosition({
+      x: Math.max(0, Math.min(window.innerWidth - 200, e.clientX - dragOffset.current.x)),
+      y: Math.max(0, Math.min(window.innerHeight - 50, e.clientY - dragOffset.current.y)),
+    })
   }
 
   const handleMouseUp = () => {
     setIsDragging(false)
+    window.removeEventListener("mousemove", handleMouseMove)
+    window.removeEventListener("mouseup", handleMouseUp)
   }
-
-  useEffect(() => {
-    if (isCompact) {
-      window.addEventListener("mousemove", handleMouseMove)
-      window.addEventListener("mouseup", handleMouseUp)
-      return () => {
-        window.removeEventListener("mousemove", handleMouseMove)
-        window.removeEventListener("mouseup", handleMouseUp)
-      }
-    }
-  }, [isCompact, isDragging, dragOffset])
 
   const headerContent = (
     <div
@@ -133,31 +120,22 @@ export default function Header({
       </div>
       {!isCompact && (
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => setIsAudioOpen(true)}
-              className="text-white hover:text-purple-400 transition-colors duration-300"
-              title="Audio Settings"
-            >
-              <Volume2 className="w-6 h-6" />
-            </button>
-            <a
-              href="https://app.formbricks.com/s/cm6ui6jwh0000jj03onw8dfr7"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white hover:text-purple-400 transition-colors duration-300"
-              title="Request games/features"
-            >
-              <MessageCirclePlus className="w-6 h-6" />
-            </a>
-            <button
-              onClick={() => setIsTabCustomizationOpen(true)}
-              className="text-white hover:text-purple-400 transition-colors duration-300"
-              title="Customize tab appearance"
-            >
-              <EyeOff className="w-6 h-6" />
-            </button>
-          </div>
+          <a
+            href="https://app.formbricks.com/s/cm6ui6jwh0000jj03onw8dfr7"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white hover:text-purple-400 transition-colors duration-300"
+            title="Request games/features"
+          >
+            <MessageCirclePlus className="w-6 h-6" />
+          </a>
+          <button
+            onClick={() => setIsTabCustomizationOpen(true)}
+            className="text-white hover:text-purple-400 transition-colors duration-300"
+            title="Customize tab appearance"
+          >
+            <EyeOff className="w-6 h-6" />
+          </button>
           <div className="relative">
             <button
               ref={categoryButtonRef}
@@ -177,15 +155,13 @@ export default function Header({
         </div>
       )}
       {isCompact && (
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={onFullscreen}
-            className="text-purple-400 w-8 h-8 flex items-center justify-center hover:bg-purple-400/20 rounded-full transition-all duration-300"
-            title="Fullscreen"
-          >
-            <Maximize2 className="w-5 h-5" />
-          </button>
-        </div>
+        <button
+          onClick={onFullscreen}
+          className="text-purple-400 w-8 h-8 flex items-center justify-center hover:bg-purple-400/20 rounded-full transition-all duration-300"
+          title="Fullscreen"
+        >
+          <Maximize2 className="w-5 h-5" />
+        </button>
       )}
     </div>
   )
@@ -201,12 +177,10 @@ export default function Header({
           {headerContent}
         </header>
       ) : (
-        <header className={`fixed top-4 z-40 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl`}>
+        <header className="fixed top-4 z-40 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl">
           {headerContent}
         </header>
       )}
-
-      <AudioControls isOpen={isAudioOpen} setIsOpen={setIsAudioOpen} />
       <CategoryDropdown
         isOpen={isCategoryOpen}
         onClose={() => setIsCategoryOpen(false)}
