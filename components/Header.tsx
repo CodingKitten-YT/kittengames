@@ -54,6 +54,13 @@ export default function Header({
     }
   }, [position, isDragging]);
 
+  const handleCategoryButtonClick = () => {
+    if (categoryButtonRef.current) {
+      setButtonRect(categoryButtonRef.current.getBoundingClientRect()); // Set the rect of the category button
+    }
+    setIsCategoryOpen(!isCategoryOpen);
+  };
+
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!isCompact || !headerRef.current) return;
 
@@ -174,18 +181,19 @@ export default function Header({
             <EyeOff className="w-6 h-6" />
           </button>
           <div className="relative">
-            <button
-              ref={categoryButtonRef}
-              onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-              className="flex items-center space-x-2 text-white text-base hover:text-purple-400 transition-colors duration-300"
-              aria-haspopup="true"
-              aria-expanded={isCategoryOpen}
-            >
-              <span>{selectedCategory}</span>
-              <ChevronDown
-                className={`w-5 h-5 transition-transform duration-300 ${isCategoryOpen ? "rotate-180" : ""}`}
-              />
-            </button>
+          <button
+            ref={categoryButtonRef}
+            onClick={handleCategoryButtonClick}
+            className="flex items-center space-x-2 text-white text-base hover:text-purple-400 transition-colors duration-300"
+            aria-haspopup="true"
+            aria-expanded={isCategoryOpen}
+          >
+            <span>{selectedCategory}</span>
+            <ChevronDown
+              className={`w-5 h-5 transition-transform duration-300 ${isCategoryOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+
           </div>
           <SearchBar onSearch={onSearch} />
         </div>
