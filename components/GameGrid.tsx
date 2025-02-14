@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react"
+import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import Image from "next/image"
 import {
   Hexagon,
@@ -22,6 +22,14 @@ const categoryIcons: { [key: string]: React.ReactNode } = {
   skill: <Gamepad className="w-6 h-6" />,
   idle: <Clock className="w-6 h-6" />,
   racing: <Car className="w-6 h-6" />,
+}
+
+// Hardcoded Ad Object
+const ad = {
+  show: false,
+  image: "https://cdn.pixabay.com/photo/2015/09/15/15/53/bank-notes-941246_960_720.jpg", // Replace with your actual image URL
+  title: "Special Offer!",
+  link: "https://example.com", // Replace with your actual ad link
 }
 
 const GameCard = ({ game, onSelect }: { game: any; onSelect: (slug: string) => void }) => {
@@ -81,11 +89,10 @@ const GameCard = ({ game, onSelect }: { game: any; onSelect: (slug: string) => v
           <Image
             src={game.image || "/placeholder.svg"}
             alt={game.name}
-            layout="fill"
-            objectFit="cover"
+            fill
             className={`transition-all duration-300 ${isLoading ? "opacity-0" : "group-hover:opacity-50"}`}
             onLoad={() => setIsLoading(false)}
-            priority={true}
+            priority
           />
         )}
         <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4">
@@ -117,6 +124,9 @@ const GameGrid = ({
 }) => {
   const [games, setGames] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const gameCardRef = useRef<HTMLDivElement | null>(null)
+  const adCardRef = useRef<HTMLDivElement | null>(null)
+  const [gameCardHeight, setGameCardHeight] = useState<number>(0)
 
   useEffect(() => {
     let isMounted = true
@@ -157,18 +167,50 @@ const GameGrid = ({
     [onGameSelect]
   )
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="w-12 h-12 text-purple-400 animate-spin" />
-      </div>
-    )
-  }
+  // Measure game card height once the component mounts
+  useEffect(() => {
+    const updateHeight = () => {
+      setGameCardHeight(gameCardRef.current?.clientHeight || 0)
+    }
+
+    if (gameCardRef.current) {
+      updateHeight()
+      window.addEventListener("resize", updateHeight)
+    }
+
+    return () => {
+      window.removeEventListener("resize", updateHeight)
+    }
+  }, [filteredGames])
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-      {filteredGames.map((game) => (
-        <GameCard key={game.name} game={game} onSelect={handleGameSelect} />
+      {ad.show && (
+        <div
+          className="col-span-2 sm:col-span-2 md:col-span-2 lg:col-span-2"
+          style={{ height: gameCardHeight ? `${gameCardHeight}px` : "auto" }}
+        >
+          <a href={ad.link} target="_blank" rel="noopener noreferrer">
+            <div className="game-card glassmorphism-dark overflow-hidden relative">
+              <div className="relative h-full">
+                <Image
+                  src={ad.image}
+                  alt={ad.title}
+                  width={300}
+                  height={gameCardHeight || 0}
+                  className="w-full object-cover rounded-md"
+                  style={{ maxHeight: `${gameCardHeight}px` }}
+                />
+              </div>
+            </div>
+          </a>
+        </div>
+      )}
+
+      {filteredGames.map((game, index) => (
+        <div key={game.name} ref={index === 0 ? gameCardRef : null}>
+          <GameCard game={game} onSelect={handleGameSelect} />
+        </div>
       ))}
     </div>
   )
