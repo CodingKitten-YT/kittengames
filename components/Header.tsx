@@ -1,9 +1,9 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
+import Draggable, { DraggableData, DraggableEvent } from "react-draggable"
 import { Cat, ChevronDown, ArrowLeft, EyeOff, Maximize2, MessageCirclePlus } from "lucide-react"
 import SearchBar from "./SearchBar"
 import CategoryDropdown from "./CategoryDropdown"
@@ -27,9 +27,7 @@ export default function Header({
   const categoryButtonRef = useRef<HTMLButtonElement>(null)
   const [buttonRect, setButtonRect] = useState<DOMRect | null>(null)
   const [selectedCategory, setSelectedCategory] = useState("All")
-  const [position, setPosition] = useState({ x: 16, y: 16 }) // Initial position (top-left corner with some padding)
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const [position, setPosition] = useState({ x: 10, y: 10 })
 
   const handleCategoryClick = () => {
     if (categoryButtonRef.current) {
@@ -43,6 +41,21 @@ export default function Header({
       e.preventDefault()
       handleCategoryClick()
     }
+  }
+
+  // Load saved position on mount
+  useEffect(() => {
+    const savedPosition = localStorage.getItem('navbarPosition')
+    if (savedPosition) {
+      setPosition(JSON.parse(savedPosition))
+    }
+  }, [])
+
+  // Save position when dragging stops
+  const handleDragStop = (_e: DraggableEvent, data: DraggableData) => {
+    const newPosition = { x: data.x, y: data.y }
+    setPosition(newPosition)
+    localStorage.setItem('navbarPosition', JSON.stringify(newPosition))
   }
 
   useEffect(() => {
@@ -65,39 +78,6 @@ export default function Header({
       }
     }
   }, [])
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isCompact) {
-      setIsDragging(true)
-      setDragOffset({
-        x: e.clientX - position.x,
-        y: e.clientY - position.y,
-      })
-    }
-  }
-
-  const handleMouseMove = (e: MouseEvent) => {
-    if (isDragging) {
-      const newX = Math.max(0, Math.min(window.innerWidth - 200, e.clientX - dragOffset.x))
-      const newY = Math.max(0, Math.min(window.innerHeight - 50, e.clientY - dragOffset.y))
-      setPosition({ x: newX, y: newY })
-    }
-  }
-
-  const handleMouseUp = () => {
-    setIsDragging(false)
-  }
-
-  useEffect(() => {
-    if (isCompact) {
-      window.addEventListener("mousemove", handleMouseMove)
-      window.addEventListener("mouseup", handleMouseUp)
-      return () => {
-        window.removeEventListener("mousemove", handleMouseMove)
-        window.removeEventListener("mouseup", handleMouseUp)
-      }
-    }
-  }, [isCompact, isDragging, dragOffset, handleMouseMove]) // Added handleMouseMove to dependencies
 
   const headerContent = (
     <div
@@ -174,13 +154,16 @@ export default function Header({
   return (
     <>
       {isCompact ? (
-        <header
-          className="fixed z-40 cursor-move"
-          style={{ left: `${position.x}px`, top: `${position.y}px` }}
-          onMouseDown={handleMouseDown}
+        <Draggable
+          bounds="parent"
+          handle=".glassmorphism-dark"
+          defaultPosition={position}
+          onStop={handleDragStop}
         >
-          {headerContent}
-        </header>
+          <header className="fixed z-40">
+            {headerContent}
+          </header>
+        </Draggable>
       ) : (
         <header className={`fixed top-4 z-40 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl`}>
           {headerContent}
@@ -202,4 +185,3 @@ export default function Header({
     </>
   )
 }
-
