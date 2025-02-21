@@ -7,7 +7,7 @@ import GameFrame from "../components/GameFrame"
 import BackToTop from "../components/BackToTop"
 
 export default function Home() {
-  const [selectedGame, setSelectedGame] = useState<string | null>(null)
+  const [selectedGame, setSelectedGame] = useState<{ slug: string; url: string | null } | null>(null)
   const [selectedCategory, setSelectedCategory] = useState("All")
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -32,6 +32,14 @@ export default function Home() {
     }
   }, [])
 
+  const handleGameSelect = useCallback((slug: string, url: string | null) => {
+    if (url) {
+      window.open(url, "_blank")
+    } else {
+      setSelectedGame({ slug, url: null })
+    }
+  }, [])
+
   return (
     <div className="min-h-screen">
       <Header
@@ -43,10 +51,10 @@ export default function Home() {
       />
       {!selectedGame ? (
         <main className="container mx-auto px-4 py-8 pt-28">
-          <GameGrid onGameSelect={setSelectedGame} selectedCategory={selectedCategory} searchQuery={searchQuery} />
+          <GameGrid onGameSelect={handleGameSelect} selectedCategory={selectedCategory} searchQuery={searchQuery} />
         </main>
       ) : (
-        <GameFrame slug={selectedGame} />
+        <GameFrame slug={selectedGame.slug} />
       )}
       <BackToTop />
     </div>

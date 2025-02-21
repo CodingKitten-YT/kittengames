@@ -61,19 +61,20 @@ export default function CategoryDropdown({
   const dropdownStyle = {
     position: "fixed",
     top: `${anchorRect.bottom + 8}px`,
-    left: `${anchorRect.left - 100}px`, // Changed to align better with the anchor
+    left: `${anchorRect.right - 192}px`,
     width: "12rem",
     maxHeight: "calc(100vh - 96px)",
     zIndex: 9999,
-    transition: "opacity 0.3s ease-out", // Improved animation for smoother visibility transition
-    opacity: isOpen ? 1 : 0, // Added opacity control for better visibility handling
   } as const
 
   return createPortal(
     <div
       ref={dropdownRef}
-      className="glassmorphism-dark rounded-global-lg shadow-lg overflow-hidden"
-      style={dropdownStyle}
+      className="glassmorphism-dark rounded-lg shadow-lg overflow-hidden"
+      style={{
+        ...dropdownStyle,
+        animation: "dropdownFade 0.3s ease-out",
+      }}
     >
       <div className="py-2">
         {categories.map((category) => (
@@ -95,6 +96,7 @@ export default function CategoryDropdown({
         ))}
       </div>
     </div>,
-    document.body
+    document.body,
   )
 }
+

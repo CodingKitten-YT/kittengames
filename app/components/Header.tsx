@@ -4,6 +4,11 @@ import SearchBar from "./SearchBar"
 import CategoryFilter from "./CategoryFilter"
 
 export default function Header() {
+  const onSearch = (searchTerm: string) => {
+    // Handle the search logic here
+    console.log("Search term:", searchTerm);
+  }
+
   return (
     <header className="fixed top-4 left-1/2 transform -translate-x-1/2 z-10 w-11/12 max-w-7xl">
       <div className="glassmorphism-dark rounded-full px-4 py-2 flex items-center justify-between">
@@ -15,10 +20,9 @@ export default function Header() {
         </Link>
         <div className="flex items-center space-x-4">
           <CategoryFilter />
-          <SearchBar />
+          <SearchBar onSearch={onSearch} />
         </div>
       </div>
     </header>
   )
 }
-

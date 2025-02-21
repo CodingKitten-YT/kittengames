@@ -1,4 +1,6 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from "react"
+"use client"
+
+import { useState, useEffect, useMemo } from "react"
 import Image from "next/image"
 import {
   Hexagon,
@@ -13,6 +15,14 @@ import {
 } from "lucide-react"
 import type React from "react"
 
+interface Game {
+  name: string
+  type: string
+  image: string
+  url: string
+  newtab?: boolean
+}
+
 const categoryIcons: { [key: string]: React.ReactNode } = {
   other: <Hexagon className="w-6 h-6" />,
   battle: <Swords className="w-6 h-6" />,
@@ -24,25 +34,21 @@ const categoryIcons: { [key: string]: React.ReactNode } = {
   racing: <Car className="w-6 h-6" />,
 }
 
-// Hardcoded Ad Object
-const ad = {
-  show: false,
-  image: "https://cdn.pixabay.com/photo/2015/09/15/15/53/bank-notes-941246_960_720.jpg", // Replace with your actual image URL
-  title: "Special Offer!",
-  link: "https://example.com", // Replace with your actual ad link
-}
-
-const GameCard = ({ game, onSelect }: { game: any; onSelect: (slug: string) => void }) => {
+function GameCard({ game, onSelect }: { game: Game; onSelect: (slug: string, url: string | null) => void }) {
   const [tiltStyle, setTiltStyle] = useState({})
   const [isLoading, setIsLoading] = useState(true)
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { left, top, width, height } = e.currentTarget.getBoundingClientRect()
-    const x = e.clientX - left
-    const y = e.clientY - top
+    const card = e.currentTarget
+    const rect = card.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
 
-    const tiltX = (height / 2 - y) / 10
-    const tiltY = (x - width / 2) / 10
+    const centerX = rect.width / 2
+    const centerY = rect.height / 2
+
+    const tiltX = (centerY - y) / 10
+    const tiltY = (x - centerX) / 10
 
     setTiltStyle({
       transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale3d(1.05, 1.05, 1.05)`,
@@ -57,15 +63,10 @@ const GameCard = ({ game, onSelect }: { game: any; onSelect: (slug: string) => v
     })
   }
 
-  // Function to determine if the image is base64
-  const isBase64Image = (image: string) => {
-    return image.startsWith("data:image/")
-  }
-
   return (
     <div
       className="game-card glassmorphism-dark overflow-hidden aspect-square relative cursor-pointer group"
-      onClick={() => onSelect(game.name.toLowerCase().replace(/\s+/g, "-"))}
+      onClick={() => onSelect(game.name.toLowerCase().replace(/\s+/g, "-"), game.newtab ? game.url : null)}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={tiltStyle}
@@ -77,24 +78,14 @@ const GameCard = ({ game, onSelect }: { game: any; onSelect: (slug: string) => v
             <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
           </div>
         )}
-        {/* Conditionally render base64 or URL image */}
-        {isBase64Image(game.image) ? (
-          <img
-            src={game.image}
-            alt={game.name}
-            className={`transition-all duration-300 ${isLoading ? "opacity-0" : "group-hover:opacity-50"}`}
-            onLoad={() => setIsLoading(false)}
-          />
-        ) : (
-          <Image
-            src={game.image || "/placeholder.svg"}
-            alt={game.name}
-            fill
-            className={`transition-all duration-300 ${isLoading ? "opacity-0" : "group-hover:opacity-50"}`}
-            onLoad={() => setIsLoading(false)}
-            priority
-          />
-        )}
+        <Image
+          src={game.image || "/placeholder.svg"}
+          alt={game.name}
+          layout="fill"
+          objectFit="cover"
+          className={`transition-all duration-300 ${isLoading ? "opacity-0" : "group-hover:opacity-50"}`}
+          onLoad={() => setIsLoading(false)}
+        />
         <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4">
           <h3 className="text-lg font-semibold text-white text-center mb-2 drop-shadow-md">{game.name}</h3>
           <div className="text-white">{categoryIcons[game.type.toLowerCase()] || categoryIcons["other"]}</div>
@@ -104,7 +95,8 @@ const GameCard = ({ game, onSelect }: { game: any; onSelect: (slug: string) => v
   )
 }
 
-const shuffleArray = <T,>(array: T[]): T[] => {
+// Fisher-Yates shuffle algorithm
+function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array]
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
@@ -113,107 +105,59 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return shuffled
 }
 
-const GameGrid = ({
+export default function GameGrid({
   onGameSelect,
   selectedCategory,
   searchQuery,
 }: {
-  onGameSelect: (slug: string) => void
+  onGameSelect: (slug: string, url: string | null) => void
   selectedCategory: string
   searchQuery: string
-}) => {
-  const [games, setGames] = useState<any[]>([])
+}) {
+  const [games, setGames] = useState<Game[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const gameCardRef = useRef<HTMLDivElement | null>(null)
-  const adCardRef = useRef<HTMLDivElement | null>(null)
-  const [gameCardHeight, setGameCardHeight] = useState<number>(0)
 
   useEffect(() => {
-    let isMounted = true
-
-    const fetchGames = async () => {
+    async function fetchGames() {
       setIsLoading(true)
       try {
         const res = await fetch("https://cdn.statically.io/gh/CodingKitten-YT/KittenGames-gamelibrary/main/games.json")
-        if (!res.ok) throw new Error("Failed to fetch games")
+        if (!res.ok) {
+          throw new Error("Failed to fetch games")
+        }
         const data = await res.json()
-        if (isMounted) setGames(shuffleArray(data))
+        setGames(shuffleArray(data)) // Shuffle the games array
       } catch (error) {
         console.error("Error fetching games:", error)
       } finally {
-        if (isMounted) setIsLoading(false)
+        setIsLoading(false)
       }
     }
-
     fetchGames()
-    return () => {
-      isMounted = false
-    }
   }, [])
 
   const filteredGames = useMemo(() => {
-    return games.filter((game) => {
-      return (
-        (selectedCategory === "All" || game.type.toLowerCase() === selectedCategory.toLowerCase()) &&
-        game.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    return games.filter((game: Game) => {
+      const matchesCategory = selectedCategory === "All" || game.type.toLowerCase() === selectedCategory.toLowerCase()
+      const matchesSearch = game.name.toLowerCase().includes(searchQuery.toLowerCase())
+      return matchesCategory && matchesSearch
     })
   }, [games, selectedCategory, searchQuery])
 
-  const handleGameSelect = useCallback(
-    (slug: string) => {
-      onGameSelect(slug)
-    },
-    [onGameSelect]
-  )
-
-  // Measure game card height once the component mounts
-  useEffect(() => {
-    const updateHeight = () => {
-      setGameCardHeight(gameCardRef.current?.clientHeight || 0)
-    }
-
-    if (gameCardRef.current) {
-      updateHeight()
-      window.addEventListener("resize", updateHeight)
-    }
-
-    return () => {
-      window.removeEventListener("resize", updateHeight)
-    }
-  }, [filteredGames])
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="w-12 h-12 text-purple-400 animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-      {ad.show && (
-        <div
-          className="col-span-2 sm:col-span-2 md:col-span-2 lg:col-span-2"
-          style={{ height: gameCardHeight ? `${gameCardHeight}px` : "auto" }}
-        >
-          <a href={ad.link} target="_blank" rel="noopener noreferrer">
-            <div className="game-card glassmorphism-dark overflow-hidden relative">
-              <div className="relative h-full">
-                <Image
-                  src={ad.image}
-                  alt={ad.title}
-                  width={300}
-                  height={gameCardHeight || 0}
-                  className="w-full object-cover rounded-md"
-                  style={{ maxHeight: `${gameCardHeight}px` }}
-                />
-              </div>
-            </div>
-          </a>
-        </div>
-      )}
-
-      {filteredGames.map((game, index) => (
-        <div key={game.name} ref={index === 0 ? gameCardRef : null}>
-          <GameCard game={game} onSelect={handleGameSelect} />
-        </div>
+      {filteredGames.map((game: Game) => (
+        <GameCard key={game.name} game={game} onSelect={onGameSelect} />
       ))}
     </div>
   )
 }
 
-export default GameGrid

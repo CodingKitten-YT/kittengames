@@ -46,3 +46,4 @@ export default function GameFrame({ slug }: { slug: string }) {
     </div>
   )
 }
+

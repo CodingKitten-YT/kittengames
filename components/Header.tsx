@@ -1,18 +1,13 @@
-"use client";
+"use client"
 
-import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
-import {
-  Cat,
-  ChevronDown,
-  ArrowLeft,
-  EyeOff,
-  Maximize2,
-  MessageCirclePlus,
-} from "lucide-react";
-import SearchBar from "./SearchBar";
-import CategoryDropdown from "./CategoryDropdown";
-import TabCustomizationPopup from "./TabCustomizationPopup";
+import type React from "react"
+
+import { useState, useRef, useEffect } from "react"
+import Link from "next/link"
+import { Cat, ChevronDown, ArrowLeft, EyeOff, Maximize2, MessageCirclePlus } from "lucide-react"
+import SearchBar from "./SearchBar"
+import CategoryDropdown from "./CategoryDropdown"
+import TabCustomizationPopup from "./TabCustomizationPopup"
 
 export default function Header({
   isCompact,
@@ -21,133 +16,99 @@ export default function Header({
   onSearch,
   onFullscreen,
 }: {
-  isCompact: boolean;
-  onBackClick: () => void;
-  onCategoryChange: (category: string) => void;
-  onSearch: (query: string) => void;
-  onFullscreen: () => void;
+  isCompact: boolean
+  onBackClick: () => void
+  onCategoryChange: (category: string) => void
+  onSearch: (query: string) => void
+  onFullscreen: () => void
 }) {
-  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-  const [isTabCustomizationOpen, setIsTabCustomizationOpen] = useState(false);
-  const categoryButtonRef = useRef<HTMLButtonElement>(null);
-  const [buttonRect, setButtonRect] = useState<DOMRect | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const headerRef = useRef<HTMLDivElement>(null);
-  const isDraggingRef = useRef(false);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false)
+  const [isTabCustomizationOpen, setIsTabCustomizationOpen] = useState(false)
+  const categoryButtonRef = useRef<HTMLButtonElement>(null)
+  const [buttonRect, setButtonRect] = useState<DOMRect | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState("All")
+  const [position, setPosition] = useState({ x: 16, y: 16 }) // Initial position (top-left corner with some padding)
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
 
-  // Load initial position from localStorage
-  const [position, setPosition] = useState<{ x: number; y: number }>(() => {
-    if (typeof window !== "undefined") {
-      const savedPosition = localStorage.getItem("navbarPosition");
-      return savedPosition ? JSON.parse(savedPosition) : { x: 20, y: 20 };
+  const handleCategoryClick = () => {
+    if (categoryButtonRef.current) {
+      setButtonRect(categoryButtonRef.current.getBoundingClientRect())
     }
-    return { x: 20, y: 20 };
-  });
+    setIsCategoryOpen(!isCategoryOpen)
+  }
 
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStart = useRef({ x: 0, y: 0 });
-  const initialPosition = useRef({ x: 0, y: 0 });
+  const handleCategoryKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault()
+      handleCategoryClick()
+    }
+  }
 
   useEffect(() => {
-    if (!isDragging) {
-      localStorage.setItem("navbarPosition", JSON.stringify(position));
+    const savedTabName = localStorage.getItem("cloakedTabName")
+    const savedTabIcon = localStorage.getItem("cloakedTabIcon")
+
+    if (savedTabName) {
+      document.title = savedTabName
     }
-  }, [position, isDragging]);
 
-  const handleCategoryButtonClick = () => {
-    if (categoryButtonRef.current) {
-      setButtonRect(categoryButtonRef.current.getBoundingClientRect()); // Set the rect of the category button
+    if (savedTabIcon) {
+      const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement
+      if (favicon) {
+        favicon.href = savedTabIcon
+      } else {
+        const newFavicon = document.createElement("link")
+        newFavicon.rel = "icon"
+        newFavicon.href = savedTabIcon
+        document.head.appendChild(newFavicon)
+      }
     }
-    setIsCategoryOpen(!isCategoryOpen);
-  };
+  }, [])
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!isCompact || !headerRef.current) return;
-
-    // Don't initiate drag on button clicks
-    if ((e.target as HTMLElement).tagName === 'BUTTON') return;
-    
-    e.preventDefault();
-    e.stopPropagation();
-    
-    isDraggingRef.current = true;
-    setIsDragging(true);
-    
-    dragStart.current = {
-      x: e.clientX,
-      y: e.clientY
-    };
-    
-    initialPosition.current = {
-      x: position.x,
-      y: position.y
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-  };
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isCompact) {
+      setIsDragging(true)
+      setDragOffset({
+        x: e.clientX - position.x,
+        y: e.clientY - position.y,
+      })
+    }
+  }
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (!isDraggingRef.current) return;
+    if (isDragging) {
+      const newX = Math.max(0, Math.min(window.innerWidth - 200, e.clientX - dragOffset.x))
+      const newY = Math.max(0, Math.min(window.innerHeight - 50, e.clientY - dragOffset.y))
+      setPosition({ x: newX, y: newY })
+    }
+  }
 
-    e.preventDefault();
-    e.stopPropagation();
+  const handleMouseUp = () => {
+    setIsDragging(false)
+  }
 
-    const deltaX = e.clientX - dragStart.current.x;
-    const deltaY = e.clientY - dragStart.current.y;
-
-    requestAnimationFrame(() => {
-      const headerWidth = headerRef.current?.offsetWidth || 200;
-      const headerHeight = headerRef.current?.offsetHeight || 50;
-
-      const newX = Math.max(0, Math.min(
-        window.innerWidth - headerWidth,
-        initialPosition.current.x + deltaX
-      ));
-      
-      const newY = Math.max(0, Math.min(
-        window.innerHeight - headerHeight,
-        initialPosition.current.y + deltaY
-      ));
-
-      setPosition({ x: newX, y: newY });
-    });
-  };
-
-  const handleMouseUp = (e: MouseEvent) => {
-    if (!isDraggingRef.current) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-    
-    isDraggingRef.current = false;
-    setIsDragging(false);
-    
-    window.removeEventListener('mousemove', handleMouseMove);
-    window.removeEventListener('mouseup', handleMouseUp);
-  };
-
-  // Clean up event listeners
   useEffect(() => {
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, []);
+    if (isCompact) {
+      window.addEventListener("mousemove", handleMouseMove)
+      window.addEventListener("mouseup", handleMouseUp)
+      return () => {
+        window.removeEventListener("mousemove", handleMouseMove)
+        window.removeEventListener("mouseup", handleMouseUp)
+      }
+    }
+  }, [isCompact, isDragging, dragOffset, handleMouseMove]) // Added handleMouseMove to dependencies
 
   const headerContent = (
     <div
-      className={`glassmorphism-dark rounded-full flex items-center justify-between select-none ${
+      className={`glassmorphism-dark rounded-full flex items-center justify-between ${
         isCompact ? "px-2 py-2" : "px-6 py-3 w-full"
       }`}
     >
       <div className="flex items-center space-x-3">
         {isCompact ? (
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onBackClick();
-            }}
+            onClick={onBackClick}
             className="text-purple-400 w-8 h-8 flex items-center justify-center hover:bg-purple-400/20 rounded-full transition-all duration-300"
             title="Back to games"
           >
@@ -181,29 +142,26 @@ export default function Header({
             <EyeOff className="w-6 h-6" />
           </button>
           <div className="relative">
-          <button
-            ref={categoryButtonRef}
-            onClick={handleCategoryButtonClick}
-            className="flex items-center space-x-2 text-white text-base hover:text-purple-400 transition-colors duration-300"
-            aria-haspopup="true"
-            aria-expanded={isCategoryOpen}
-          >
-            <span>{selectedCategory}</span>
-            <ChevronDown
-              className={`w-5 h-5 transition-transform duration-300 ${isCategoryOpen ? "rotate-180" : ""}`}
-            />
-          </button>
-
+            <button
+              ref={categoryButtonRef}
+              onClick={handleCategoryClick}
+              onKeyDown={handleCategoryKeyDown}
+              className="flex items-center space-x-2 text-white text-base hover:text-purple-400 transition-colors duration-300"
+              aria-haspopup="true"
+              aria-expanded={isCategoryOpen}
+            >
+              <span>{selectedCategory}</span>
+              <ChevronDown
+                className={`w-5 h-5 transition-transform duration-300 ${isCategoryOpen ? "rotate-180" : ""}`}
+              />
+            </button>
           </div>
           <SearchBar onSearch={onSearch} />
         </div>
       )}
       {isCompact && (
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onFullscreen();
-          }}
+          onClick={onFullscreen}
           className="text-purple-400 w-8 h-8 flex items-center justify-center hover:bg-purple-400/20 rounded-full transition-all duration-300"
           title="Fullscreen"
         >
@@ -211,41 +169,37 @@ export default function Header({
         </button>
       )}
     </div>
-  );
+  )
 
   return (
     <>
       {isCompact ? (
         <header
-          ref={headerRef}
-          className={`fixed z-40 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-          style={{
-            left: `${position.x}px`,
-            top: `${position.y}px`,
-            touchAction: 'none',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-          }}
+          className="fixed z-40 cursor-move"
+          style={{ left: `${position.x}px`, top: `${position.y}px` }}
           onMouseDown={handleMouseDown}
         >
           {headerContent}
         </header>
       ) : (
-        <header className="fixed top-4 z-40 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl">
+        <header className={`fixed top-4 z-40 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl`}>
           {headerContent}
         </header>
       )}
+
       <CategoryDropdown
         isOpen={isCategoryOpen}
         onClose={() => setIsCategoryOpen(false)}
         onCategoryChange={(category) => {
-          setSelectedCategory(category);
-          onCategoryChange(category);
+          setSelectedCategory(category)
+          onCategoryChange(category)
         }}
         anchorRect={buttonRect}
         selectedCategory={selectedCategory}
       />
+
       <TabCustomizationPopup isOpen={isTabCustomizationOpen} onClose={() => setIsTabCustomizationOpen(false)} />
     </>
-  );
+  )
 }
+
