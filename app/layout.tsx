@@ -18,6 +18,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" href="/favicon.ico" />
+        <script defer src="https://cloud.umami.is/script.js" data-website-id="1f0a416d-67e8-435f-b6ec-9af2a2fa359f"></script>
       </head>
       <body className={`${inter.className} bg-[rgb(var(--background))] text-[rgb(var(--foreground))]`}>{children}</body>
     </html>
