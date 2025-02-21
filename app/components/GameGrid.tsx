@@ -1,4 +1,4 @@
-import Image from "next/image"
+import Image from "next/legacy/image"
 import Link from "next/link"
 import type React from "react"
 import { Hexagon, Swords, Footprints, Crosshair, PuzzleIcon as PuzzlePiece, Gamepad, Clock, Car } from "lucide-react"
@@ -28,7 +28,7 @@ export default async function GameGrid() {
   const games = await getGames()
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+    (<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
       {games.map((game: any) => (
         <Link href={`/game/${game.name.toLowerCase().replace(/\s+/g, "-")}`} key={game.name} className="block">
           <div className="glassmorphism-dark rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 group aspect-square">
@@ -48,7 +48,7 @@ export default async function GameGrid() {
           </div>
         </Link>
       ))}
-    </div>
-  )
+    </div>)
+  );
 }
 

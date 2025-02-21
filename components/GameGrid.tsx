@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import Image from "next/image"
+import Image from "next/legacy/image"
 import {
   Hexagon,
   Swords,
@@ -64,7 +64,7 @@ function GameCard({ game, onSelect }: { game: Game; onSelect: (slug: string, url
   }
 
   return (
-    <div
+    (<div
       className="game-card glassmorphism-dark overflow-hidden aspect-square relative cursor-pointer group"
       onClick={() => onSelect(game.name.toLowerCase().replace(/\s+/g, "-"), game.newtab ? game.url : null)}
       onMouseMove={handleMouseMove}
@@ -91,8 +91,8 @@ function GameCard({ game, onSelect }: { game: Game; onSelect: (slug: string, url
           <div className="text-white">{categoryIcons[game.type.toLowerCase()] || categoryIcons["other"]}</div>
         </div>
       </div>
-    </div>
-  )
+    </div>)
+  );
 }
 
 // Fisher-Yates shuffle algorithm

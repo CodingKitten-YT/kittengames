@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { X, ChevronDown } from "lucide-react"
-import Image from "next/image"
+import Image from "next/legacy/image"
 import type React from "react"
 
 interface TabCustomizationPopupProps {
