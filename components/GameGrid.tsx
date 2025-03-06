@@ -146,7 +146,7 @@ export default function GameGrid({
     async function fetchGames() {
       setIsLoading(true)
       try {
-        const res = await fetch("https://cdn.statically.io/gh/CodingKitten-YT/KittenGames-gamelibrary/main/games.json")
+        const res = await fetch("https://raw.githubusercontent.com/CodingKitten-YT/KittenGames-gamelibrary/refs/heads/main/games.json")
         if (!res.ok) {
           throw new Error("Failed to fetch games")
         }
