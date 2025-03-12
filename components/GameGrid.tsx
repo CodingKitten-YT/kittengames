@@ -99,7 +99,6 @@ function GameCard({ game, onSelect, isNew = false }: { game: Game; onSelect: (sl
         <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 bg-black/40 rounded-lg">
           <h3 className="text-lg font-bold text-white text-center mb-2 drop-shadow-md">{game.name}</h3>
           <div className="bg-purple-600/80 p-2 rounded-full text-white mb-2">{categoryIcons[game.type.toLowerCase()] || categoryIcons["other"]}</div>
-          <div className="text-xs text-white/80 mt-1">{game.type}</div>
         </div>
       </div>
     </div>)
