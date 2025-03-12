@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, ChevronDown } from "lucide-react"
+import { X, ChevronDown, Check } from "lucide-react"
 import Image from "next/legacy/image"
 import type React from "react"
 
@@ -147,43 +147,88 @@ export default function TabCustomizationPopup({ isOpen, onClose }: TabCustomizat
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="glassmorphism-dark rounded-lg overflow-hidden p-6 w-96 shadow-2xl transform transition-all duration-300 ease-out">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-white">Customize Tab Appearance</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
-            <X className="w-6 h-6" />
+    <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl overflow-hidden p-6 w-96 shadow-2xl border border-gray-700/50 transform transition-all duration-300 ease-out">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500">
+            Customize Tab Appearance
+          </h2>
+          <button 
+            onClick={onClose} 
+            className="text-gray-400 hover:text-white transition-colors p-1 rounded-xl hover:bg-gray-700/50"
+          >
+            <X className="w-5 h-5" />
           </button>
         </div>
         {isLoading ? (
-          <div className="text-center py-4 text-white">Loading presets...</div>
+          <div className="text-center py-8 text-white flex flex-col items-center">
+            <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-xl animate-spin mb-2"></div>
+            <span>Loading presets...</span>
+          </div>
         ) : (
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="preset" className="block text-sm font-medium text-gray-300 mb-1">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label htmlFor="preset" className="block text-sm font-medium text-gray-300 mb-2">
                 Preset
               </label>
               <div className="relative">
                 <button
                   type="button"
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md overflow-hidden focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all duration-300 flex justify-between items-center"
+                  className="w-full px-4 py-3 bg-gray-800/80 text-white rounded-lg overflow-hidden focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 border border-gray-700/50 transition-all duration-300 flex justify-between items-center hover:bg-gray-700/50"
                 >
-                  {selectedPreset?.name || "Select a preset"}
+                  <div className="flex items-center space-x-3">
+                    {selectedPreset?.tabIcon && selectedPreset.name !== "Custom" ? (
+                      <div className="flex-shrink-0 w-5 h-5 relative">
+                        <Image
+                          src={selectedPreset.tabIcon}
+                          alt={selectedPreset.name}
+                          layout="fill"
+                          objectFit="contain"
+                          className="rounded-sm"
+                        />
+                      </div>
+                    ) : selectedPreset?.name === "Custom" ? (
+                      <div className="w-5 h-5 bg-purple-600 rounded-xl flex items-center justify-center">
+                        <span className="text-xs text-white">C</span>
+                      </div>
+                    ) : null}
+                    <span>{selectedPreset?.name || "Select a preset"}</span>
+                  </div>
                   <ChevronDown
-                    className={`w-5 h-5 transition-transform duration-300 ${isDropdownOpen ? "rotate-180" : ""}`}
+                    className={`w-5 h-5 transition-transform duration-300 text-purple-400 ${isDropdownOpen ? "rotate-180" : ""}`}
                   />
                 </button>
                 {isDropdownOpen && (
-                  <div className="absolute z-10 w-full mt-1 bg-gray-700 rounded-md overflow-hidden shadow-lg max-h-60 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-1 bg-gray-800 rounded-lg overflow-hidden shadow-lg max-h-60 overflow-y-auto border border-gray-700/50 animate-in fade-in slide-in-from-top-2 duration-150">
                     {presets.map((preset) => (
                       <button
                         key={preset.name}
                         type="button"
                         onClick={() => handlePresetChange(preset)}
-                        className="w-full px-3 py-2 text-left text-white hover:bg-gray-600 transition-colors"
+                        className="w-full px-4 py-3 text-left text-white hover:bg-gray-700/70 transition-colors flex items-center justify-between"
                       >
-                        {preset.name}
+                        <div className="flex items-center space-x-3">
+                          {preset.tabIcon && preset.name !== "Custom" ? (
+                            <div className="flex-shrink-0 w-5 h-5 relative">
+                              <Image
+                                src={preset.tabIcon}
+                                alt={preset.name}
+                                layout="fill"
+                                objectFit="contain"
+                                className="rounded-sm"
+                              />
+                            </div>
+                          ) : preset.name === "Custom" ? (
+                            <div className="w-5 h-5 bg-purple-600 rounded-xl flex items-center justify-center">
+                              <span className="text-xs text-white">C</span>
+                            </div>
+                          ) : null}
+                          <span>{preset.name}</span>
+                        </div>
+                        {selectedPreset?.name === preset.name && (
+                          <Check className="w-4 h-4 text-purple-400" />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -192,8 +237,8 @@ export default function TabCustomizationPopup({ isOpen, onClose }: TabCustomizat
             </div>
             {selectedPreset?.name === "Custom" && (
               <>
-                <div className="mb-4">
-                  <label htmlFor="tabName" className="block text-sm font-medium text-gray-300 mb-1">
+                <div>
+                  <label htmlFor="tabName" className="block text-sm font-medium text-gray-300 mb-2">
                     Tab Name
                   </label>
                   <input
@@ -201,11 +246,12 @@ export default function TabCustomizationPopup({ isOpen, onClose }: TabCustomizat
                     id="tabName"
                     value={tabName}
                     onChange={(e) => setTabName(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-md overflow-hidden focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all duration-300"
+                    placeholder="Enter custom tab name"
+                    className="w-full px-4 py-3 bg-gray-800/80 text-white rounded-lg overflow-hidden focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 border border-gray-700/50 transition-all duration-300 placeholder-gray-500"
                   />
                 </div>
-                <div className="mb-4">
-                  <label htmlFor="tabIcon" className="block text-sm font-medium text-gray-300 mb-1">
+                <div>
+                  <label htmlFor="tabIcon" className="block text-sm font-medium text-gray-300 mb-2">
                     Tab Icon URL
                   </label>
                   <input
@@ -213,16 +259,17 @@ export default function TabCustomizationPopup({ isOpen, onClose }: TabCustomizat
                     id="tabIcon"
                     value={tabIcon}
                     onChange={(e) => setTabIcon(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-md overflow-hidden focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all duration-300"
+                    placeholder="https://example.com/icon.png"
+                    className="w-full px-4 py-3 bg-gray-800/80 text-white rounded-lg overflow-hidden focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 border border-gray-700/50 transition-all duration-300 placeholder-gray-500"
                   />
                 </div>
               </>
             )}
-            <div className="mb-4">
+            <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Preview</label>
-              <div className="bg-gray-800 rounded-md overflow-hidden">
-                <div className="flex items-center space-x-2 bg-gray-900 px-3 py-2">
-                  {tabIcon && (
+              <div className="bg-gray-800/60 rounded-lg overflow-hidden border border-gray-700/50">
+                <div className="flex items-center space-x-3 bg-gray-900/80 px-4 py-3">
+                  {tabIcon ? (
                     <div className="flex-shrink-0 w-4 h-4 relative">
                       <Image
                         src={tabIcon}
@@ -232,19 +279,24 @@ export default function TabCustomizationPopup({ isOpen, onClose }: TabCustomizat
                         className="rounded-sm"
                       />
                     </div>
+                  ) : (
+                    <div className="w-4 h-4 bg-gray-700 rounded-sm"></div>
                   )}
                   <span className="text-sm text-white truncate flex-grow">
                     {tabName || "Tab Title"}
                   </span>
                 </div>
-                <div className="bg-gray-800 h-24 flex items-center justify-center">
-                  <span className="text-gray-400 text-sm">Website Content</span>
+                <div className="bg-gray-800/60 h-28 flex items-center justify-center p-4">
+                  <div className="text-gray-400 text-sm text-center">
+                    <p>Website Content</p>
+                    <p className="text-xs mt-2 text-gray-500">The tab will appear like this in your browser</p>
+                  </div>
                 </div>
               </div>
             </div>
             <button
               type="submit"
-              className="w-full bg-purple-600 text-white py-2 rounded-md overflow-hidden hover:bg-purple-700 transition-colors"
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-4 rounded-lg overflow-hidden hover:from-purple-700 hover:to-pink-700 transition-all duration-300 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transform hover:translate-y-px active:translate-y-0.5"
             >
               Apply Changes
             </button>

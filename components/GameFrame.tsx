@@ -15,7 +15,7 @@ export default function GameFrame({ slug }: { slug: string }) {
   useEffect(() => {
     async function fetchGame() {
       setIsLoading(true)
-      const res = await fetch("https://cdn.statically.io/gh/CodingKitten-YT/KittenGames-gamelibrary/main/games.json")
+      const res = await fetch("https://raw.githubusercontent.com/CodingKitten-YT/KittenGames-gamelibrary/refs/heads/main/games.json")
       const games = await res.json()
       const foundGame = games.find((g: Game) => g.name.toLowerCase().replace(/\s+/g, "-") === slug)
       setGame(foundGame)
