@@ -5,6 +5,7 @@ import GameGrid from "../components/GameGrid"
 import Header from "../components/Header"
 import GameFrame from "../components/GameFrame"
 import BackToTop from "../components/BackToTop"
+import OneTimePopup from '../components/OneTimePopup';
 
 export default function Home() {
   const [selectedGame, setSelectedGame] = useState<{ slug: string; url: string | null } | null>(null)
@@ -57,6 +58,7 @@ export default function Home() {
         <GameFrame slug={selectedGame.slug} />
       )}
       <BackToTop />
+      <OneTimePopup />
     </div>
   )
 }
