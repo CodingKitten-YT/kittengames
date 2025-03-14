@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable"
-import { Cat, ChevronDown, ArrowLeft, EyeOff, Maximize2, MessageCirclePlus } from "lucide-react"
+import { Cat, ChevronDown, ArrowLeft, EyeOff, Maximize2, MessageCirclePlus, Film } from "lucide-react"
 import SearchBar from "./SearchBar"
 import CategoryDropdown from "./CategoryDropdown"
 import TabCustomizationPopup from "./TabCustomizationPopup"
@@ -113,6 +113,15 @@ export default function Header({
             title="Request games/features"
           >
             <MessageCirclePlus className="w-6 h-6" />
+          </a>
+          <a
+            href="https://kitten-flix.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white hover:text-purple-400 transition-colors duration-300"
+            title="Watch free movies"
+          >
+            <Film className="w-6 h-6" />
           </a>
           <button
             onClick={() => setIsTabCustomizationOpen(true)}
