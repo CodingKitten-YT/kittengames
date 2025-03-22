@@ -1,0 +1,18 @@
+{
+    acme_ca https://acme-v02.api.letsencrypt.org/directory
+}
+
+# Handle requests on IPv6
+[2604:2dc0:100:1c66::1490]:80 {
+    reverse_proxy web:3000
+}
+
+# Handle requests on IPv6 with HTTPS
+[2604:2dc0:100:1c66::1490]:443 {
+    reverse_proxy web:3000
+}
+
+# Catch-all for HTTP requests (redirects to HTTPS)
+:80 {
+    reverse_proxy web:3000
+}
