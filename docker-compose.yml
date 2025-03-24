@@ -8,10 +8,9 @@ services:
     environment:
       - NODE_ENV=production
     networks:
-      - app-network
+      - kittengames-network
     expose:
       - "3000"
-
   caddy:
     image: caddy:latest
     restart: unless-stopped
@@ -23,12 +22,13 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     networks:
-      - app-network
+      - kittengames-network
     depends_on:
       - web
 
 networks:
-  app-network:
+  kittengames-network:
+    driver: bridge
 
 volumes:
   caddy_data:
