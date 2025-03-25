@@ -1,18 +1,17 @@
-"use client"
-
 import { useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
-import { Hexagon, Swords, Footprints, Crosshair, PuzzleIcon as PuzzlePiece, Gamepad, Clock, Car } from "lucide-react"
+import { Hexagon, Joystick, Swords, Footprints, Crosshair, PuzzleIcon as PuzzlePiece, Gamepad, Clock, Car } from "lucide-react"
 
 const categories = [
-  { name: "All", icon: <Hexagon className="w-4 h-4" /> },
-  { name: "Battle", icon: <Swords className="w-4 h-4" /> },
-  { name: "Platformer", icon: <Footprints className="w-4 h-4" /> },
-  { name: "Shooter", icon: <Crosshair className="w-4 h-4" /> },
-  { name: "Puzzle", icon: <PuzzlePiece className="w-4 h-4" /> },
-  { name: "Skill", icon: <Gamepad className="w-4 h-4" /> },
-  { name: "Idle", icon: <Clock className="w-4 h-4" /> },
-  { name: "Racing", icon: <Car className="w-4 h-4" /> },
+  { name: "All", icon: <Hexagon className="w-5 h-5" /> },
+  { name: "Battle", icon: <Swords className="w-5 h-5" /> },
+  { name: "Platformer", icon: <Footprints className="w-5 h-5" /> },
+  { name: "Shooter", icon: <Crosshair className="w-5 h-5" /> },
+  { name: "Puzzle", icon: <PuzzlePiece className="w-5 h-5" /> },
+  { name: "Skill", icon: <Gamepad className="w-5 h-5" /> },
+  { name: "Idle", icon: <Clock className="w-5 h-5" /> },
+  { name: "Racing", icon: <Car className="w-5 h-5" /> },
+  { name: "Retro", icon: <Joystick className="w-5 h-5" /> },
 ]
 
 interface CategoryDropdownProps {
@@ -60,21 +59,18 @@ export default function CategoryDropdown({
 
   const dropdownStyle = {
     position: "fixed",
-    top: `${anchorRect.bottom + 8}px`,
-    left: `${anchorRect.right - 192}px`,
-    width: "12rem",
-    maxHeight: "calc(100vh - 96px)",
+    top: `${anchorRect.bottom + 12}px`,
+    left: `${anchorRect.right - 220}px`,
+    width: "14rem",
+    maxHeight: "calc(100vh - 140px)",
     zIndex: 9999,
   } as const
 
   return createPortal(
     <div
       ref={dropdownRef}
-      className="glassmorphism-dark rounded-lg shadow-lg overflow-hidden"
-      style={{
-        ...dropdownStyle,
-        animation: "dropdownFade 0.3s ease-out",
-      }}
+      className="bg-gray-800/95 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-700/60 overflow-hidden animate-dropdown-fade"
+      style={dropdownStyle}
     >
       <div className="py-2">
         {categories.map((category) => (
@@ -84,13 +80,19 @@ export default function CategoryDropdown({
               onCategoryChange(category.name)
               onClose()
             }}
-            className={`flex items-center w-full px-3 py-1.5 text-xs ${
-              selectedCategory === category.name
-                ? "bg-purple-600 text-white"
-                : "text-gray-300 hover:bg-gray-700 hover:text-white"
-            } transition-colors`}
+            className={`
+              flex items-center w-full px-4 py-3 text-base font-medium group 
+              transition-all duration-200 ease-in-out 
+              ${selectedCategory === category.name 
+                ? "bg-purple-600/90 text-white" 
+                : "text-gray-300 hover:bg-gray-700/80 hover:text-white"}
+              focus:outline-none focus:ring-2 focus:ring-purple-500/60
+            `}
           >
-            <span className="mr-2">{category.icon}</span>
+            <span className={`mr-4 opacity-80 group-hover:opacity-100 transition-opacity 
+              ${selectedCategory === category.name ? 'text-white' : 'text-gray-400'}`}>
+              {category.icon}
+            </span>
             {category.name}
           </button>
         ))}
@@ -99,4 +101,3 @@ export default function CategoryDropdown({
     document.body,
   )
 }
-

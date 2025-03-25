@@ -7,6 +7,7 @@ import {
   Swords,
   Footprints,
   Crosshair,
+  Joystick,
   PuzzleIcon as PuzzlePiece,
   Gamepad,
   Clock,
@@ -36,6 +37,7 @@ const categoryIcons: { [key: string]: React.ReactNode } = {
   skill: <Gamepad className="w-6 h-6" />,
   idle: <Clock className="w-6 h-6" />,
   racing: <Car className="w-6 h-6" />,
+  retro: <Joystick className="w-6 h-6" />,
 }
 
 function GameCard({ game, onSelect, isNew = false }: { game: Game; onSelect: (slug: string, url: string | null) => void; isNew?: boolean }) {
@@ -89,7 +91,7 @@ function GameCard({ game, onSelect, isNew = false }: { game: Game; onSelect: (sl
           </div>
         )}
         <Image
-          src={game.image || "/placeholder.svg"}
+          src={game.image || "https://placehold.co/512?text=No+Image"}
           alt={game.name}
           layout="fill"
           objectFit="cover"
@@ -183,7 +185,7 @@ export default function GameGrid({
     if (searchQuery || selectedCategory !== "All") {
       return []; // Don't show recent games when filtering
     }
-    return games.slice(0, 5);
+    return games.slice(0, 10);
   }, [games, searchQuery, selectedCategory]);
 
   // Get remaining games, shuffled
