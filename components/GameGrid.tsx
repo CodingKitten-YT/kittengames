@@ -81,12 +81,6 @@ function GameCard({ game, onSelect, isNew = false }: { game: Game; onSelect: (sl
       style={tiltStyle}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-      {isNew && (
-        <div className="absolute top-2 right-2 z-10 bg-purple-600 text-white text-xs px-2 py-1 rounded-full flex items-center shadow-md">
-          <Sparkles className="w-3 h-3 mr-1" />
-          New
-        </div>
-      )}
       <div className="relative h-full">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-900 rounded-lg">

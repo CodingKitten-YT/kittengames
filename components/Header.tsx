@@ -36,7 +36,7 @@ export default function Header({
   const [position, setPosition] = useState({ x: 10, y: 10 })
 
   const {
-    backButtonMargin = '-mr-0.8',
+    backButtonMargin = '-mr-0.5',
     eyeOffButtonMargin = '-ml-0',
     fullscreenButtonMargin = ''
   } = compactNavbarConfig
