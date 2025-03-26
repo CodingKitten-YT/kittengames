@@ -1,17 +1,19 @@
 {
-    acme_ca https://acme-v02.api.letsencrypt.org/directory
+    # Enables on-demand TLS with domain validation
     on_demand_tls {
         ask https://caddy-api.1242601565.workers.dev/cert-allow
     }
 }
 
 :443 {
+    reverse_proxy http://localhost:3000
+
     tls {
         on_demand
     }
-    reverse_proxy web:3000
 }
-
+n
+# Redirect HTTP to HTTPS
 :80 {
-    reverse_proxy web:3000
+    redir https://{host}{uri}
 }

@@ -15,12 +15,18 @@ export default function Header({
   onCategoryChange,
   onSearch,
   onFullscreen,
+  compactNavbarConfig = {},
 }: {
   isCompact: boolean
   onBackClick: () => void
   onCategoryChange: (category: string) => void
   onSearch: (query: string) => void
   onFullscreen: () => void
+  compactNavbarConfig?: {
+    backButtonMargin?: string
+    eyeOffButtonMargin?: string
+    fullscreenButtonMargin?: string
+  }
 }) {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false)
   const [isTabCustomizationOpen, setIsTabCustomizationOpen] = useState(false)
@@ -28,6 +34,12 @@ export default function Header({
   const [buttonRect, setButtonRect] = useState<DOMRect | null>(null)
   const [selectedCategory, setSelectedCategory] = useState("All")
   const [position, setPosition] = useState({ x: 10, y: 10 })
+
+  const {
+    backButtonMargin = '-mr-0.8',
+    eyeOffButtonMargin = '-ml-0',
+    fullscreenButtonMargin = ''
+  } = compactNavbarConfig
 
   const handleCategoryClick = () => {
     if (categoryButtonRef.current) {
@@ -82,18 +94,27 @@ export default function Header({
   const headerContent = (
     <div
       className={`glassmorphism-dark rounded-full flex items-center justify-between ${
-        isCompact ? "px-2 py-2" : "px-6 py-3 w-full"
+        isCompact ? "px-2 py-1.5" : "px-6 py-3 w-full"
       }`}
     >
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-1">
         {isCompact ? (
-          <button
-            onClick={onBackClick}
-            className="text-purple-400 w-8 h-8 flex items-center justify-center hover:bg-purple-400/20 rounded-full transition-all duration-300"
-            title="Back to games"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <>
+            <button
+              onClick={onBackClick}
+              className={`text-purple-400 w-8 h-8 flex items-center justify-center hover:bg-purple-400/20 rounded-full transition-all duration-300 ${backButtonMargin}`}
+              title="Back to games"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setIsTabCustomizationOpen(true)}
+              className={`text-purple-400 w-8 h-8 flex items-center justify-center hover:bg-purple-400/20 rounded-full transition-all duration-300 ${eyeOffButtonMargin}`}
+              title="Customize tab appearance"
+            >
+              <EyeOff className="w-5 h-5" />
+            </button>
+          </>
         ) : (
           <Link href="/" className="flex items-center space-x-3">
             <Cat className="w-6 h-6 text-purple-400" />
@@ -149,13 +170,15 @@ export default function Header({
         </div>
       )}
       {isCompact && (
-        <button
-          onClick={onFullscreen}
-          className="text-purple-400 w-8 h-8 flex items-center justify-center hover:bg-purple-400/20 rounded-full transition-all duration-300"
-          title="Fullscreen"
-        >
-          <Maximize2 className="w-5 h-5" />
-        </button>
+        <div className="flex items-center space-x-1">
+          <button
+            onClick={onFullscreen}
+            className={`text-purple-400 w-8 h-8 flex items-center justify-center hover:bg-purple-400/20 rounded-full transition-all duration-300 ${fullscreenButtonMargin}`}
+            title="Fullscreen"
+          >
+            <Maximize2 className="w-5 h-5" />
+          </button>
+        </div>
       )}
     </div>
   )

@@ -12,10 +12,12 @@ import {
   Gamepad,
   Clock,
   Car,
+  UsersRound,
   Loader2,
   Sparkles,
   LayoutGrid,
   Search,
+  User,
 } from "lucide-react"
 import type React from "react"
 
@@ -25,7 +27,7 @@ interface Game {
   image: string
   url: string
   newtab?: boolean
-  added?: string // Date when the game was added
+  added?: string
 }
 
 const categoryIcons: { [key: string]: React.ReactNode } = {
@@ -38,6 +40,7 @@ const categoryIcons: { [key: string]: React.ReactNode } = {
   idle: <Clock className="w-6 h-6" />,
   racing: <Car className="w-6 h-6" />,
   retro: <Joystick className="w-6 h-6" />,
+  multiplayer: <UsersRound className="w-6 h-6" />,
 }
 
 function GameCard({ game, onSelect, isNew = false }: { game: Game; onSelect: (slug: string, url: string | null) => void; isNew?: boolean }) {

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
-import { Hexagon, Joystick, Swords, Footprints, Crosshair, PuzzleIcon as PuzzlePiece, Gamepad, Clock, Car } from "lucide-react"
+import { Hexagon, Joystick, Swords, Footprints, Crosshair, PuzzleIcon, UsersRound as PuzzlePiece, Gamepad, Clock, Car, UsersRound } from "lucide-react"
 
 const categories = [
   { name: "All", icon: <Hexagon className="w-5 h-5" /> },
@@ -12,6 +12,7 @@ const categories = [
   { name: "Idle", icon: <Clock className="w-5 h-5" /> },
   { name: "Racing", icon: <Car className="w-5 h-5" /> },
   { name: "Retro", icon: <Joystick className="w-5 h-5" /> },
+  { name: "Multiplayer", icon: <UsersRound className="w-5 h-5" /> },
 ]
 
 interface CategoryDropdownProps {
