@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
-import { Hexagon, Joystick, Swords, Footprints, Crosshair, PuzzleIcon, UsersRound as PuzzlePiece, Gamepad, Clock, Car, UsersRound } from "lucide-react"
+import { Hexagon, Joystick, Swords, UsersRound, Footprints, Crosshair, PuzzleIcon as PuzzlePiece, Gamepad, Clock, Car } from "lucide-react"
 
 const categories = [
   { name: "All", icon: <Hexagon className="w-5 h-5" /> },
