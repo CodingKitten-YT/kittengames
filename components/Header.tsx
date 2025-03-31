@@ -136,8 +136,8 @@ export default function Header({
             <MessageCirclePlus className="w-6 h-6" />
           </a>
           <a
-            href="https://kitten-flix.vercel.app/"
-            target="_blank"
+            href={window.location.hostname === "kittengames.vercel.app" ? "https://kitten-flix.vercel.app/" : "/movies/"}
+            target={window.location.hostname === "kittengames.vercel.app" ? "_blank" : "_self"}
             rel="noopener noreferrer"
             className="text-white hover:text-purple-400 transition-colors duration-300"
             title="Watch free movies"
