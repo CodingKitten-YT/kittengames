@@ -8,6 +8,7 @@ import { Cat, ChevronDown, ArrowLeft, EyeOff, Maximize2, MessageCirclePlus, Film
 import SearchBar from "./SearchBar"
 import CategoryDropdown from "./CategoryDropdown"
 import TabCustomizationPopup from "./TabCustomizationPopup"
+import MovieLink from "./MovieLink"
 
 export default function Header({
   isCompact,
@@ -135,15 +136,7 @@ export default function Header({
           >
             <MessageCirclePlus className="w-6 h-6" />
           </a>
-          <a
-            href={window.location.hostname === "kittengames.vercel.app" ? "https://kitten-flix.vercel.app/" : "/movies/"}
-            target={window.location.hostname === "kittengames.vercel.app" ? "_blank" : "_self"}
-            rel="noopener noreferrer"
-            className="text-white hover:text-purple-400 transition-colors duration-300"
-            title="Watch free movies"
-          >
-            <Film className="w-6 h-6" />
-          </a>
+          <MovieLink />
           <button
             onClick={() => setIsTabCustomizationOpen(true)}
             className="text-white hover:text-purple-400 transition-colors duration-300"
