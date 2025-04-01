@@ -8,7 +8,7 @@ const MovieLink = () => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       if (window.location.hostname === "kittengames.vercel.app") {
-        setLink("https://kitten-flix.vercel.app/");
+        setLink("https://movies.kittendev.xyz/movies/");
         setTarget("_blank");
       } else {
         setLink("/movies/");
