@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable"
-import { Cat, ChevronDown, ArrowLeft, EyeOff, Maximize2, MessageCirclePlus, Film, Gamepad, Apple as Apps, Settings } from "lucide-react"
+import { Cat, ChevronDown, ArrowLeft, EyeOff, Maximize2, MessageCirclePlus, Film, Gamepad, Apple, Settings } from "lucide-react"
 import SearchBar from "./SearchBar"
 import CategoryDropdown from "./CategoryDropdown"
 import TabCustomizationPopup from "./TabCustomizationPopup"
@@ -27,7 +27,7 @@ interface HeaderProps {
 
 const navItems = [
   { id: "games", label: "Games", icon: Gamepad, href: "/" },
-  { id: "apps", label: "Apps", icon: Apps, href: "/apps" },
+  { id: "apps", label: "Apps", icon: Apple, href: "/apps" },
   { id: "settings", label: "Settings", icon: Settings, href: "/settings" },
 ]
 
