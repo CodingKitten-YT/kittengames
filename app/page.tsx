@@ -44,6 +44,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <Header
+        currentPage="games"
         isCompact={!!selectedGame}
         onBackClick={handleBackClick}
         onCategoryChange={handleCategoryChange}
@@ -62,4 +63,3 @@ export default function Home() {
     </div>
   )
 }
-

@@ -3,38 +3,51 @@
 import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
+import { useRouter, usePathname } from "next/navigation"
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable"
-import { Cat, ChevronDown, ArrowLeft, EyeOff, Maximize2, MessageCirclePlus, Film } from "lucide-react"
+import { Cat, ChevronDown, ArrowLeft, EyeOff, Maximize2, MessageCirclePlus, Film, Gamepad, Apps, Settings } from "lucide-react"
 import SearchBar from "./SearchBar"
 import CategoryDropdown from "./CategoryDropdown"
 import TabCustomizationPopup from "./TabCustomizationPopup"
 import MovieLink from "./MovieLink"
 
+interface HeaderProps {
+  currentPage: "games" | "apps" | "settings"
+  isCompact?: boolean
+  onBackClick?: () => void
+  onCategoryChange?: (category: string) => void
+  onSearch?: (query: string) => void
+  onFullscreen?: () => void
+  compactNavbarConfig?: {
+    backButtonMargin?: string
+    eyeOffButtonMargin?: string
+    fullscreenButtonMargin?: string
+  }
+}
+
+const navItems = [
+  { id: "games", label: "Games", icon: Gamepad, href: "/" },
+  { id: "apps", label: "Apps", icon: Apps, href: "/apps" },
+  { id: "settings", label: "Settings", icon: Settings, href: "/settings" },
+]
+
 export default function Header({
+  currentPage,
   isCompact,
   onBackClick,
   onCategoryChange,
   onSearch,
   onFullscreen,
   compactNavbarConfig = {},
-}: {
-  isCompact: boolean
-  onBackClick: () => void
-  onCategoryChange: (category: string) => void
-  onSearch: (query: string) => void
-  onFullscreen: () => void
-  compactNavbarConfig?: {
-    backButtonMargin?: string
-    eyeOffButtonMargin?: string
-    fullscreenButtonMargin?: string
-  }
-}) {
+}: HeaderProps) {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false)
   const [isTabCustomizationOpen, setIsTabCustomizationOpen] = useState(false)
   const categoryButtonRef = useRef<HTMLButtonElement>(null)
   const [buttonRect, setButtonRect] = useState<DOMRect | null>(null)
   const [selectedCategory, setSelectedCategory] = useState("All")
   const [position, setPosition] = useState({ x: 10, y: 10 })
+  const router = useRouter()
+  const pathname = usePathname()
 
   const {
     backButtonMargin = '-mr-0.5',
@@ -56,7 +69,6 @@ export default function Header({
     }
   }
 
-  // Load saved position on mount
   useEffect(() => {
     const savedPosition = localStorage.getItem('navbarPosition')
     if (savedPosition) {
@@ -64,7 +76,6 @@ export default function Header({
     }
   }, [])
 
-  // Save position when dragging stops
   const handleDragStop = (_e: DraggableEvent, data: DraggableData) => {
     const newPosition = { x: data.x, y: data.y }
     setPosition(newPosition)
@@ -117,15 +128,36 @@ export default function Header({
             </button>
           </>
         ) : (
-          <Link href="/" className="flex items-center space-x-3">
-            <Cat className="w-6 h-6 text-purple-400" />
-            <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 hidden sm:inline">
-              KittenGames
-            </span>
-          </Link>
+          <>
+            <Link href="/" className="flex items-center space-x-3">
+              <Cat className="w-6 h-6 text-purple-400" />
+              <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 hidden sm:inline">
+                KittenGames
+              </span>
+            </Link>
+            <div className="ml-6 flex items-center space-x-2">
+              {navItems.map((item) => {
+                const Icon = item.icon
+                const isActive = item.id === currentPage
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    className={`relative px-4 py-2 rounded-full flex items-center space-x-2 transition-all duration-300
+                      ${isActive ? 'text-white bg-purple-600/30' : 'text-gray-400 hover:text-white hover:bg-gray-700/30'}`}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span className={`transition-all duration-300 origin-left ${isActive ? 'opacity-100 max-w-[100px]' : 'opacity-0 max-w-0 hidden'}`}>
+                      {item.label}
+                    </span>
+                  </Link>
+                )
+              })}
+            </div>
+          </>
         )}
       </div>
-      {!isCompact && (
+      {!isCompact && currentPage === "games" && (
         <div className="flex items-center space-x-4">
           <a
             href="https://app.formbricks.com/s/cm6ui6jwh0000jj03onw8dfr7"
@@ -200,7 +232,7 @@ export default function Header({
         onClose={() => setIsCategoryOpen(false)}
         onCategoryChange={(category) => {
           setSelectedCategory(category)
-          onCategoryChange(category)
+          onCategoryChange?.(category)
         }}
         anchorRect={buttonRect}
         selectedCategory={selectedCategory}
