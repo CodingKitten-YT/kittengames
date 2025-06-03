@@ -133,12 +133,13 @@ export default function Header({
           </>
         ) : (
           <>
-            <Link href="/" className="flex items-center space-x-3">
+            <Link href="/" className="flex items-center space-x-3 mr-4">
               <Cat className="w-6 h-6 text-purple-400" />
               <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 hidden sm:inline">
                 KittenGames
               </span>
             </Link>
+
             <div className="ml-12 flex items-center space-x-4">
               {navItems.map((item) => {
                 const Icon = item.icon
