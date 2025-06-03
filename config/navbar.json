@@ -1,0 +1,8 @@
+{
+  "alwaysVisible": ["customizeTab", "requestFeature"],
+  "pageSpecific": {
+    "games": ["categories", "search", "movies"],
+    "apps": [],
+    "settings": []
+  }
+}

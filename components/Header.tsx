@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
@@ -10,6 +8,7 @@ import SearchBar from "./SearchBar"
 import CategoryDropdown from "./CategoryDropdown"
 import TabCustomizationPopup from "./TabCustomizationPopup"
 import MovieLink from "./MovieLink"
+import navbarConfig from "../config/navbar.json"
 
 interface HeaderProps {
   currentPage: "games" | "apps" | "settings"
@@ -103,6 +102,11 @@ export default function Header({
     }
   }, [])
 
+  const shouldShowButton = (buttonId: string) => {
+    return navbarConfig.alwaysVisible.includes(buttonId) || 
+           navbarConfig.pageSpecific[currentPage]?.includes(buttonId)
+  }
+
   const headerContent = (
     <div
       className={`glassmorphism-dark rounded-full flex items-center justify-between ${
@@ -135,7 +139,7 @@ export default function Header({
                 KittenGames
               </span>
             </Link>
-            <div className="ml-6 flex items-center space-x-2">
+            <div className="ml-12 flex items-center space-x-3">
               {navItems.map((item) => {
                 const Icon = item.icon
                 const isActive = item.id === currentPage
@@ -157,41 +161,47 @@ export default function Header({
           </>
         )}
       </div>
-      {!isCompact && currentPage === "games" && (
+      {!isCompact && (
         <div className="flex items-center space-x-4">
-          <a
-            href="https://app.formbricks.com/s/cm6ui6jwh0000jj03onw8dfr7"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-white hover:text-purple-400 transition-colors duration-300"
-            title="Request games/features"
-          >
-            <MessageCirclePlus className="w-6 h-6" />
-          </a>
-          <MovieLink />
-          <button
-            onClick={() => setIsTabCustomizationOpen(true)}
-            className="text-white hover:text-purple-400 transition-colors duration-300"
-            title="Customize tab appearance"
-          >
-            <EyeOff className="w-6 h-6" />
-          </button>
-          <div className="relative">
-            <button
-              ref={categoryButtonRef}
-              onClick={handleCategoryClick}
-              onKeyDown={handleCategoryKeyDown}
-              className="flex items-center space-x-2 text-white text-base hover:text-purple-400 transition-colors duration-300"
-              aria-haspopup="true"
-              aria-expanded={isCategoryOpen}
+          {shouldShowButton("requestFeature") && (
+            <a
+              href="https://app.formbricks.com/s/cm6ui6jwh0000jj03onw8dfr7"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white hover:text-purple-400 transition-colors duration-300"
+              title="Request games/features"
             >
-              <span>{selectedCategory}</span>
-              <ChevronDown
-                className={`w-5 h-5 transition-transform duration-300 ${isCategoryOpen ? "rotate-180" : ""}`}
-              />
+              <MessageCirclePlus className="w-6 h-6" />
+            </a>
+          )}
+          {shouldShowButton("movies") && <MovieLink />}
+          {shouldShowButton("customizeTab") && (
+            <button
+              onClick={() => setIsTabCustomizationOpen(true)}
+              className="text-white hover:text-purple-400 transition-colors duration-300"
+              title="Customize tab appearance"
+            >
+              <EyeOff className="w-6 h-6" />
             </button>
-          </div>
-          <SearchBar onSearch={onSearch} />
+          )}
+          {shouldShowButton("categories") && (
+            <div className="relative">
+              <button
+                ref={categoryButtonRef}
+                onClick={handleCategoryClick}
+                onKeyDown={handleCategoryKeyDown}
+                className="flex items-center space-x-2 text-white text-base hover:text-purple-400 transition-colors duration-300"
+                aria-haspopup="true"
+                aria-expanded={isCategoryOpen}
+              >
+                <span>{selectedCategory}</span>
+                <ChevronDown
+                  className={`w-5 h-5 transition-transform duration-300 ${isCategoryOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+            </div>
+          )}
+          {shouldShowButton("search") && <SearchBar onSearch={onSearch} />}
         </div>
       )}
       {isCompact && (
