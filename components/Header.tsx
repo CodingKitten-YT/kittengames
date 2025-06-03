@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable"
-import { Cat, ChevronDown, ArrowLeft, EyeOff, Maximize2, MessageCirclePlus, Film, Gamepad, Apple, Settings } from "lucide-react"
+import { Cat, ChevronDown, ArrowLeft, EyeOff, Maximize2, MessageCirclePlus, Film, Gamepad, LayoutGrid, Settings } from "lucide-react"
 import SearchBar from "./SearchBar"
 import CategoryDropdown from "./CategoryDropdown"
 import TabCustomizationPopup from "./TabCustomizationPopup"
@@ -26,7 +26,7 @@ interface HeaderProps {
 
 const navItems = [
   { id: "games", label: "Games", icon: Gamepad, href: "/" },
-  { id: "apps", label: "Apps", icon: Apple, href: "/apps" },
+  { id: "apps", label: "Apps", icon: LayoutGrid, href: "/apps" },
   { id: "settings", label: "Settings", icon: Settings, href: "/settings" },
 ]
 
@@ -139,7 +139,7 @@ export default function Header({
                 KittenGames
               </span>
             </Link>
-            <div className="ml-12 flex items-center space-x-3">
+            <div className="ml-20 flex items-center space-x-4">
               {navItems.map((item) => {
                 const Icon = item.icon
                 const isActive = item.id === currentPage
