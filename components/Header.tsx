@@ -140,7 +140,7 @@ export default function Header({
               </span>
             </Link>
 
-            <div className="ml-2 flex items-center space-x-4">
+            <div className="ml-2 flex items-center space-x-2">
               {navItems.map((item) => {
                 const Icon = item.icon
                 const isActive = item.id === currentPage
