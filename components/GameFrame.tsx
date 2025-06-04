@@ -24,6 +24,13 @@ export default function GameFrame({ slug }: { slug: string }) {
     fetchGame()
   }, [slug])
 
+  useEffect(() => {
+    const iframe = document.getElementById('game-iframe') as HTMLIFrameElement | null
+    if (iframe) {
+      iframe.setAttribute('tabindex', '0')
+    }
+  }, [])
+
   if (isLoading) {
     return (
       <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-gray-900">
@@ -35,15 +42,16 @@ export default function GameFrame({ slug }: { slug: string }) {
   if (!game) return <div className="flex justify-center items-center h-screen w-screen">Game not found</div>
 
   return (
-    <div className="fixed inset-0 w-full h-full">
+    <div className="fixed inset-0 w-full h-full bg-gray-900">
       <iframe
         id="game-iframe"
         src={game.url}
         title={game.name}
-        className="w-full h-full border-0 pointer-events-auto"
+        className="w-full h-full border-0"
         allowFullScreen
+        tabIndex={0}
+        allow="keyboard; fullscreen"
       />
     </div>
   )
 }
-

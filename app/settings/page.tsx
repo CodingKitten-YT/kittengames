@@ -2,7 +2,7 @@
 
 import Header from "../../components/Header"
 
-export default function Settings() {
+export default function Apps() {
   return (
     <div className="min-h-screen">
       <Header currentPage="settings" />

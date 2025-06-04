@@ -1,7 +1,7 @@
 {
-  "alwaysVisible": ["customizeTab", "requestFeature"],
+  "alwaysVisible": ["customizeTab", "requestFeature", "movies"],
   "pageSpecific": {
-    "games": ["categories", "search", "movies"],
+    "games": ["categories", "search"],
     "apps": [],
     "settings": []
   }
