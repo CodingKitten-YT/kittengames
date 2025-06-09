@@ -6,6 +6,7 @@ import Header from "../components/Header"
 import GameFrame from "../components/GameFrame"
 import BackToTop from "../components/BackToTop"
 import OneTimePopup from '../components/OneTimePopup';
+import { getCurrentSettings, launchGame } from "../components/GameLaunchSettingsPanel"
 
 export default function Home() {
   const [selectedGame, setSelectedGame] = useState<{ slug: string; url: string | null } | null>(null)
@@ -34,10 +35,31 @@ export default function Home() {
   }, [])
 
   const handleGameSelect = useCallback((slug: string, url: string | null) => {
+    const settings = getCurrentSettings()
+    
     if (url) {
-      window.open(url, "_blank")
+      // Legacy direct URL opening - let settings handle this
+      launchGame(url, settings)
     } else {
-      setSelectedGame({ slug, url: null })
+      // Game needs to be loaded - check settings for launch mode
+      if (settings.openMode === "new-tab" || settings.openMode === "about-blank") {
+        // For new-tab and about-blank, we need to get the game URL first
+        fetch("https://raw.githubusercontent.com/CodingKitten-YT/KittenGames-gamelibrary/refs/heads/main/games.json")
+          .then(res => res.json())
+          .then(games => {
+            const game = games.find((g: any) => g.name.toLowerCase().replace(/\s+/g, "-") === slug)
+            if (game) {
+              launchGame(game.url, settings)
+            }
+          })
+          .catch(() => {
+            // Fallback to same-tab mode
+            setSelectedGame({ slug, url: null })
+          })
+      } else {
+        // Same-tab mode - load in current tab
+        setSelectedGame({ slug, url: null })
+      }
     }
   }, [])
 

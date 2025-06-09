@@ -20,6 +20,10 @@ import {
   User,
 } from "lucide-react"
 import type React from "react"
+// useGameLaunchSettings is imported but not directly needed for launchGame,
+// launchGame itself calls getCurrentSettings.
+// However, keeping it doesn't harm if settings were to be used for other UI logic here.
+import { useGameLaunchSettings, launchGame } from "./GameLaunchSettingsPanel"
 
 interface Game {
   name: string
@@ -139,6 +143,7 @@ export default function GameGrid({
 }) {
   const [games, setGames] = useState<Game[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  // const settings = useGameLaunchSettings && useGameLaunchSettings(); // This line is not strictly necessary for calling launchGame
 
   useEffect(() => {
     async function fetchGames() {
@@ -234,6 +239,16 @@ export default function GameGrid({
     return "All Games";
   };
 
+  function handleGameSelect(slug: string, url: string | null) {
+    if (url) {
+      // launchGame now correctly called with only the URL
+      launchGame(url)
+    } else {
+      // If there's no direct URL (e.g., for games that navigate via slug within the app)
+      onGameSelect(slug, url)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -271,14 +286,13 @@ export default function GameGrid({
               <GameCard 
                 key={game.name} 
                 game={game} 
-                onSelect={onGameSelect} 
+                onSelect={handleGameSelect} 
                 isNew={isRecentlyAdded(game)}
               />
             ))}
           </div>
         </div>
       )}
-
       {/* All Games Section with count */}
       <div className="bg-gray-800/30 p-6 rounded-xl">
         <SectionHeader 
@@ -286,14 +300,13 @@ export default function GameGrid({
           title={getFilterTitle()}
           count={searchQuery || selectedCategory !== "All" ? filteredGames.length : games.length}
         />
-        
         {remainingGames.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
             {remainingGames.map((game: Game) => (
               <GameCard 
                 key={game.name} 
                 game={game} 
-                onSelect={onGameSelect} 
+                onSelect={handleGameSelect} 
                 isNew={isRecentlyAdded(game)}
               />
             ))}

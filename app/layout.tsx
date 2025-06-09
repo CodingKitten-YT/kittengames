@@ -1,7 +1,7 @@
 import "./globals.css"
 import { Inter } from "next/font/google"
 import type React from "react"
-import HotkeyProvider from "../components/HotkeyProvider"
+import { GameLaunchSettingsProvider } from "../components/GameLaunchSettingsPanel"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -23,9 +23,9 @@ export default function RootLayout({
         <script type='text/javascript' src='//pl26836592.profitableratecpm.com/03/87/f5/0387f55197917e6a8a3807dbdea31bd6.js'></script>
       </head>
       <body className={`${inter.className} bg-[rgb(var(--background))] text-[rgb(var(--foreground))]`}>
-        <HotkeyProvider>
+        <GameLaunchSettingsProvider>
           {children}
-        </HotkeyProvider>
+        </GameLaunchSettingsProvider>
       </body>
     </html>
   )
