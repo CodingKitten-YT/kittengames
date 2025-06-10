@@ -118,7 +118,7 @@ export function launchGame(url: string) {
 
   const settings = getCurrentSettings();
   console.log("launchGame: Using settings:", settings); 
-  window.onbeforeunload = null;
+  window.onbeforeunload = null; // Clear any existing global onbeforeunload handler
 
   const cloakTabTitle = localStorage.getItem("cloakedTabName") || "Game";
   const cloakTabIcon = localStorage.getItem("cloakedTabIcon") || "";
@@ -159,9 +159,7 @@ export function launchGame(url: string) {
     window.open(url, '_blank');
   } else { // same-tab
     console.log("launchGame: Mode is 'same-tab'. Navigating in current tab.");
-    if (settings.confirmClose) {
-      window.onbeforeunload = () => "Are you sure you want to leave this page? Your game progress might be lost.";
-    }
+    // The onbeforeunload logic is now handled by the PlayGame component itself
     window.location.href = url;
   }
 }
