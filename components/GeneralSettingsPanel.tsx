@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Trash2,
   AlertTriangle,
@@ -13,13 +13,21 @@ import {
 export default function GeneralSettingsPanel() {
   const [isResetting, setIsResetting] = useState(false)
   const [resetSuccess, setResetSuccess] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
   const [storageInfo, setStorageInfo] = useState<{
     totalKeys: number
     totalSize: string
     keys: string[]
   } | null>(null)
 
+  // Only render on client side
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   const calculateStorageInfo = () => {
+    if (typeof window === 'undefined') return
+    
     const keys = Object.keys(localStorage)
     let totalSize = 0
     
@@ -43,6 +51,8 @@ export default function GeneralSettingsPanel() {
   }
 
   const handleResetLocalStorage = async () => {
+    if (typeof window === 'undefined') return
+    
     if (!window.confirm('Are you sure you want to reset all local storage? This will clear all your settings and preferences.')) {
       return
     }
@@ -68,6 +78,35 @@ export default function GeneralSettingsPanel() {
     } finally {
       setIsResetting(false)
     }
+  }
+
+  // Don't render until mounted on client
+  if (!isMounted) {
+    return (
+      <div className="space-y-8">
+        <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+          <div className="animate-pulse">
+            <div className="h-6 bg-gray-700 rounded w-1/3 mb-4"></div>
+            <div className="h-4 bg-gray-700 rounded w-2/3 mb-4"></div>
+            <div className="flex gap-4">
+              <div className="h-10 bg-gray-700 rounded w-32"></div>
+              <div className="h-10 bg-gray-700 rounded w-32"></div>
+            </div>
+          </div>
+        </div>
+        <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+          <div className="animate-pulse">
+            <div className="h-6 bg-gray-700 rounded w-1/4 mb-4"></div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="h-4 bg-gray-700 rounded"></div>
+              <div className="h-4 bg-gray-700 rounded"></div>
+              <div className="h-4 bg-gray-700 rounded"></div>
+              <div className="h-4 bg-gray-700 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -166,7 +205,7 @@ export default function GeneralSettingsPanel() {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-gray-400">Version:</span>
-              <span className="text-white font-mono">4.1.0</span>
+              <span className="text-white font-mono">1.0.0</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Build Date:</span>
@@ -174,23 +213,29 @@ export default function GeneralSettingsPanel() {
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">User Agent:</span>
-              <span className="text-white font-mono text-xs truncate max-w-48" title={navigator.userAgent}>
-                {navigator.userAgent.split(' ')[0]}
+              <span className="text-white font-mono text-xs truncate max-w-48" title={typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A'}>
+                {typeof navigator !== 'undefined' ? navigator.userAgent.split(' ')[0] : 'N/A'}
               </span>
             </div>
           </div>
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-gray-400">Screen Resolution:</span>
-              <span className="text-white font-mono">{screen.width}x{screen.height}</span>
+              <span className="text-white font-mono">
+                {typeof screen !== 'undefined' ? `${screen.width}x${screen.height}` : 'N/A'}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Viewport Size:</span>
-              <span className="text-white font-mono">{window.innerWidth}x{window.innerHeight}</span>
+              <span className="text-white font-mono">
+                {typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'N/A'}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Time Zone:</span>
-              <span className="text-white font-mono">{Intl.DateTimeFormat().resolvedOptions().timeZone}</span>
+              <span className="text-white font-mono">
+                {typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'N/A'}
+              </span>
             </div>
           </div>
         </div>
