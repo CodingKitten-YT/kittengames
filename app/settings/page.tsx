@@ -11,27 +11,22 @@ import {
 } from "lucide-react"
 import CloakSettingsPanel from "../../components/CloakSettingsPanel"
 import GameLaunchSettingsPanel from "../../components/GameLaunchSettingsPanel"
+import GeneralSettingsPanel from "../../components/GeneralSettingsPanel"
 
 const categories = [
   { key: "general", label: "General", icon: <SettingsIcon className="w-5 h-5 mr-3" /> },
   { key: "cloak", label: "Cloak", icon: <CloakIcon className="w-5 h-5 mr-3" /> },
   { key: "hotkeys", label: "Game Launch", icon: <LaunchIcon className="w-5 h-5 mr-3" /> },
-  { key: "privacy", label: "Privacy", icon: <ShieldIcon className="w-5 h-5 mr-3" /> },
-  { key: "about", label: "About", icon: <InfoIcon className="w-5 h-5 mr-3" /> },
 ]
 
 function CategoryOptions({ selected }: { selected: string }) {
   switch (selected) {
     case "general":
-      return <div>General settings options go here.</div>
+      return <GeneralSettingsPanel />
     case "cloak":
       return <CloakSettingsPanel />
     case "hotkeys":
       return <GameLaunchSettingsPanel />
-    case "privacy":
-      return <div>Privacy settings options go here.</div>
-    case "about":
-      return <div>About this app.</div>
     default:
       return <div>Select a category.</div>
   }
