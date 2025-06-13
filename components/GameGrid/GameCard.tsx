@@ -4,12 +4,10 @@ import { useState, memo, useCallback } from "react"
 import Image from "next/image"
 import {
   Loader2,
-  Sparkles,
   ExternalLink,
-  Play,
 } from "lucide-react"
-import type React from "react"
-import { launchGame, getCurrentSettings } from "../GameLaunchSettingsPanel"
+import React from "react"
+import { launchGame } from "../GameLaunchSettingsPanel" // Removed getCurrentSettings as it's called within launchGame
 import { createEncodedGameSlug } from "../../utils/rot13"
 import { categoryIcons } from "../../utils/categoryIcons"
 
@@ -22,17 +20,15 @@ interface Game {
   added?: string
 }
 
-// Cache for encoded slugs to optimize performance
 const encodedSlugCache = new Map<string, string>();
 
-const GameCard = memo(({ game, isRecent = false }: { game: Game; isRecent?: boolean }) => {
+const GameCard = memo(({ game }: { game: Game; isRecent?: boolean }) => {
   const [encodedSlug, setEncodedSlug] = useState<string>('');
   const [tiltStyle, setTiltStyle] = useState({})
   const [isLoading, setIsLoading] = useState(true)
   const [imageError, setImageError] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
 
-  // Pre-encode slug on hover for instant navigation
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true)
     if (!encodedSlug) {
@@ -40,22 +36,18 @@ const GameCard = memo(({ game, isRecent = false }: { game: Game; isRecent?: bool
       if (encodedSlugCache.has(slug)) {
         setEncodedSlug(encodedSlugCache.get(slug)!);
       } else {
-        const encoded = createEncodedGameSlug(game.name);
-        encodedSlugCache.set(slug, encoded);
-        setEncodedSlug(encoded);
+        const newEncodedSlug = createEncodedGameSlug(game.name);
+        encodedSlugCache.set(slug, newEncodedSlug);
+        setEncodedSlug(newEncodedSlug);
       }
     }
   }, [game.name, encodedSlug]);
 
-  // Handle click - either navigate or launch directly
   const handleClick = useCallback(() => {
+    const finalSlug = encodedSlug || createEncodedGameSlug(game.name);
     if (game.newtab) {
-      // Launch directly for games marked as newtab
-      const settings = getCurrentSettings();
-      launchGame(game.url, settings);
+      launchGame(game.url);
     } else {
-      // Navigate to play page with pre-encoded slug
-      const finalSlug = encodedSlug || createEncodedGameSlug(game.name);
       window.location.href = `/play/${finalSlug}`;
     }
   }, [game, encodedSlug]);
@@ -65,15 +57,12 @@ const GameCard = memo(({ game, isRecent = false }: { game: Game; isRecent?: bool
     const rect = card.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
-
     const centerX = rect.width / 2
     const centerY = rect.height / 2
-
-    const tiltX = (centerY - y) / 15
-    const tiltY = (x - centerX) / 15
-
+    const tiltX = (centerY - y) / 20
+    const tiltY = (x - centerX) / 20
     setTiltStyle({
-      transform: `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale3d(1.02, 1.02, 1.02)`,
+      transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale3d(1.02, 1.02, 1.02)`,
       transition: "transform 0.1s ease-out",
     })
   }
@@ -81,32 +70,23 @@ const GameCard = memo(({ game, isRecent = false }: { game: Game; isRecent?: bool
   const handleMouseLeave = () => {
     setIsHovered(false)
     setTiltStyle({
-      transform: "perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)",
-      transition: "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+      transform: "perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)",
+      transition: "transform 0.3s ease-in-out",
     })
   }
 
-  const handleImageLoad = () => {
-    setIsLoading(false)
-    setImageError(false)
-  }
-
+  const handleImageLoad = () => setIsLoading(false)
   const handleImageError = () => {
     setIsLoading(false)
     setImageError(true)
   }
 
-  // Create a fallback image URL or use a placeholder
-  const imageUrl = game.image || `https://via.placeholder.com/400x400/1f2937/9ca3af?text=${encodeURIComponent(game.name)}`
+  const imageUrl = game.image || `https://via.placeholder.com/300x300/2d3748/e2e8f0?text=${encodeURIComponent(game.name)}`
 
   return (
     <div
-      className={`group relative bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-md rounded-2xl overflow-hidden border transition-all duration-500 cursor-pointer aspect-square
-        ${isHovered 
-          ? 'border-purple-400/60 shadow-2xl shadow-purple-500/25' 
-          : 'border-gray-700/40 hover:border-gray-600/60'
-        }
-        ${isRecent ? 'ring-2 ring-yellow-500/30' : ''}
+      className={`group relative bg-gray-800 rounded-xl overflow-hidden border border-gray-700/30 transition-all duration-300 cursor-pointer aspect-square
+        hover:border-purple-500/40 hover:shadow-lg 
       `}
       onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
@@ -114,63 +94,38 @@ const GameCard = memo(({ game, isRecent = false }: { game: Game; isRecent?: bool
       style={tiltStyle}
       onClick={handleClick}
     >
-      {/* New Game Badge */}
-      {isRecent && (
-        <div className="absolute top-2 right-2 z-10 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
-          <Sparkles className="w-3 h-3 inline mr-1" />
-          NEW
-        </div>
-      )}
-
-      {/* External Link Badge */}
       {game.newtab && (
-        <div className="absolute top-2 left-2 z-10 bg-blue-500/80 backdrop-blur-sm p-1.5 rounded-full">
-          <ExternalLink className="w-3 h-3 text-white" />
+        <div className="absolute top-2 left-2 z-10 bg-blue-600/80 p-0.5 rounded-full">
+          <ExternalLink className="w-2.5 h-2.5 text-white" />
         </div>
       )}
 
-      {/* Enhanced gradient overlay */}
-      <div className={`absolute inset-0 bg-gradient-to-br transition-opacity duration-300 rounded-2xl
-        ${isHovered 
-          ? 'from-purple-600/30 via-pink-500/20 to-blue-500/30 opacity-100' 
-          : 'from-purple-500/10 to-pink-500/10 opacity-0'
-        }`}
-      />
-
-      {/* Animated border glow */}
-      <div className={`absolute inset-0 rounded-2xl transition-opacity duration-300
-        ${isHovered ? 'bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-blue-500/20 opacity-100' : 'opacity-0'}
-      `} style={{
-        background: isHovered ? 'conic-gradient(from 0deg, rgba(168, 85, 247, 0.3), rgba(236, 72, 153, 0.3), rgba(59, 130, 246, 0.3), rgba(168, 85, 247, 0.3))' : 'none',
-        animation: isHovered ? 'spin 3s linear infinite' : 'none',
-      }} />
-
-      <div className="relative h-full w-full rounded-2xl overflow-hidden">
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-sm rounded-2xl">
-            <div className="flex flex-col items-center space-y-2">
-              <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
-              <div className="text-xs text-purple-300 opacity-60">Loading...</div>
+      <div className="relative h-full w-full rounded-xl overflow-hidden">
+        {isLoading && !imageError && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-800/90 rounded-xl">
+            <div className="flex flex-col items-center space-y-1.5">
+              <Loader2 className="w-5 h-5 lg:w-6 lg:h-6 text-gray-400 animate-spin" />
+              <div className="text-[9px] lg:text-[10px] text-gray-500">Loading...</div>
             </div>
           </div>
         )}
         
         {imageError ? (
-          // Enhanced fallback UI
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-4">
-            <div className="bg-gradient-to-br from-purple-600 to-pink-600 p-4 rounded-2xl text-white mb-4 shadow-lg">
-              {categoryIcons[game.type.toLowerCase()] || categoryIcons["other"]}
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-800 rounded-xl p-3 text-center">
+            <div className="bg-gray-700/70 p-2 sm:p-3 rounded-lg text-gray-400 mb-2">
+              {React.cloneElement(categoryIcons[game.type.toLowerCase()] || categoryIcons["other"], { className: "w-8 h-8 sm:w-10 md:w-12" })}
             </div>
-            <h3 className="text-sm font-bold text-white text-center leading-tight">{game.name}</h3>
-            <div className="text-xs text-gray-400 mt-2 capitalize">{game.type}</div>
+            <h3 className="font-semibold text-gray-200 leading-tight text-base sm:text-lg md:text-xl">{game.name}</h3>
+            <div className="text-gray-400 mt-1 capitalize text-xs sm:text-sm md:text-base">{game.type}</div>
           </div>
         ) : (
           <Image
             src={imageUrl}
             alt={game.name}
             fill
-            className={`object-cover transition-all duration-500 rounded-2xl
-              ${isLoading ? "opacity-0 scale-110" : isHovered ? "opacity-60 scale-105" : "opacity-100 scale-100"}
+            className={`object-cover transition-all duration-300 rounded-xl
+              ${isLoading ? "opacity-0 scale-105" : "opacity-100"}
+              group-hover:brightness-75 
             `}
             onLoad={handleImageLoad}
             onError={handleImageError}
@@ -179,38 +134,28 @@ const GameCard = memo(({ game, isRecent = false }: { game: Game; isRecent?: bool
           />
         )}
         
-        {/* Enhanced overlay with better typography */}
-        <div className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-300 p-4 rounded-2xl
-          ${isHovered ? 'opacity-100 bg-black/60 backdrop-blur-sm' : 'opacity-0'}
-        `}>
-          <div className="text-center space-y-3">
-            <h3 className="text-lg font-bold text-white leading-tight drop-shadow-lg">
-              {game.name}
-            </h3>
-            
-            <div className="flex items-center justify-center space-x-2">
-              <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-2 rounded-xl text-white shadow-lg">
-                {categoryIcons[game.type.toLowerCase()] || categoryIcons["other"]}
+        {!isLoading && !imageError && (
+          <div 
+            className={`absolute inset-0 bg-gray-900/75 backdrop-blur-sm flex flex-col items-center justify-center transition-opacity duration-300 p-3 sm:p-4 rounded-xl
+              ${isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'} 
+            `}
+          >
+            <div className="text-center space-y-3 sm:space-y-4">
+              <h3 className="font-semibold text-white leading-tight text-lg sm:text-xl md:text-2xl">
+                {game.name}
+              </h3>
+              
+              <div className="flex items-center justify-center">
+                <div className="bg-gray-800/80 p-3 sm:p-4 rounded-lg"> 
+                  {React.cloneElement(categoryIcons[game.type.toLowerCase()] || categoryIcons["other"], { 
+                    className: "w-6 h-6 sm:w-7 sm:h-7 text-purple-400" 
+                  })}
+                </div>
               </div>
-              <div className="text-xs text-gray-200 bg-black/40 px-2 py-1 rounded-full capitalize">
-                {game.type}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center text-purple-300">
-              <Play className="w-4 h-4 mr-1" />
-              <span className="text-sm font-medium">Play Now</span>
             </div>
           </div>
-        </div>
+        )}
       </div>
-
-      <style jsx>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   )
 })

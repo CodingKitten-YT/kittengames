@@ -27,17 +27,19 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="min-h-screen">
-      <Header
+    <>
+      <Header 
         currentPage="games"
         onCategoryChange={handleCategoryChange}
         onSearch={handleSearch}
       />
-      <main className="container mx-auto px-4 py-8 pt-28">
-        <GameGrid onGameSelect={handleGameSelect} selectedCategory={selectedCategory} searchQuery={searchQuery} />
+      <main className="container mx-auto px-4 pt-24 pb-8"> {/* Ensure consistent top padding */}
+        <GameGrid 
+          onGameSelect={handleGameSelect} 
+          selectedCategory={selectedCategory} 
+          searchQuery={searchQuery} 
+        />
       </main>
-      <BackToTop />
-      <OneTimePopup />
-    </div>
-  )
+    </>
+  );
 }

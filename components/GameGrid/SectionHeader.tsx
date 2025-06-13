@@ -1,32 +1,35 @@
+"use client"
+
 import type React from "react"
 
-function SectionHeader({ icon, title, count, gradient = false }: { 
-  icon: React.ReactNode; 
-  title: string; 
-  count?: number;
-  gradient?: boolean;
-}) {
+interface SectionHeaderProps {
+  title: string
+  icon?: React.ReactNode
+  count?: number
+  gradient?: boolean
+}
+
+export default function SectionHeader({ title, icon, count, gradient = false }: SectionHeaderProps) {
   return (
-    <div className="flex items-center mb-8 px-1 group">
-      <div className={`mr-4 p-3 rounded-2xl text-white shadow-lg transition-all duration-300 group-hover:scale-110
-        ${gradient 
-          ? 'bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600' 
-          : 'bg-gradient-to-r from-purple-700 to-purple-800'
-        }`}>
-        {icon}
-      </div>
-      <div className="flex-1">
-        <h2 className="text-3xl font-bold text-white mb-1 tracking-tight">{title}</h2>
+    <div className="mb-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          {icon && (
+            <div className="text-purple-400">
+              {icon}
+            </div>
+          )}
+          <h2 className="text-2xl font-semibold text-white">{title}</h2>
+        </div>
         {count !== undefined && (
           <div className="flex items-center space-x-2">
-            <div className="bg-purple-800/50 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-purple-100 border border-purple-700/30">
+            <span className="text-sm text-gray-400 bg-gray-800/60 px-3 py-1.5 rounded-full border border-gray-700/50">
               {count} {count === 1 ? 'game' : 'games'}
-            </div>
+            </span>
           </div>
         )}
       </div>
+      <div className="mt-3 h-px bg-gradient-to-r from-purple-500/30 via-gray-700/50 to-transparent"></div>
     </div>
-  );
+  )
 }
-
-export default SectionHeader

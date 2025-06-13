@@ -1,34 +1,69 @@
-import type React from "react"
-import { useState, useRef, useEffect } from "react"
-import Link from "next/link"
+"use client"
+
+import { useState, useEffect, useRef } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import Draggable, { DraggableData, DraggableEvent } from "react-draggable"
-import { Cat, ChevronDown, ArrowLeft, EyeOff, Maximize2, MessageCirclePlus, Film, Gamepad, LayoutGrid, Settings } from "lucide-react"
-import SearchBar from "./SearchBar"
+import Image from "next/image"
+import Link from "next/link"
+import {
+  X,
+  Check,
+  Home,
+  Gamepad2,
+  Settings,
+  Search,
+  ChevronDown, // Only import once
+  EyeOff,
+  ArrowLeft,
+  Maximize2,
+  MessageCirclePlus,
+  Film,
+} from "lucide-react"
+
+// Fix incorrect import paths
+import SearchBar from "./SearchBar" // Changed from "./Search"
 import CategoryDropdown from "./CategoryDropdown"
 import TabCustomizationPopup from "./TabCustomizationPopup"
 import MovieLink from "./MovieLink"
-import navbarConfig from "../config/navbar.json"
+import navbarData from "../config/navbar.json" // Import JSON file
 
-interface HeaderProps {
-  currentPage: "games" | "apps" | "settings"
-  isCompact?: boolean
-  onBackClick?: () => void
-  onCategoryChange?: (category: string) => void
-  onSearch?: (query: string) => void
-  onFullscreen?: () => void
-  compactNavbarConfig?: {
-    backButtonMargin?: string
-    eyeOffButtonMargin?: string
-    fullscreenButtonMargin?: string
-  }
+// Define NavItem interface for navigation items
+interface NavItem {
+  id: string;
+  label: string;
+  href: string;
+  icon: React.ElementType;
 }
 
-const navItems = [
-  { id: "games", label: "Games", icon: Gamepad, href: "/" },
-  { id: "apps", label: "Apps", icon: LayoutGrid, href: "/apps" },
-  { id: "settings", label: "Settings", icon: Settings, href: "/settings" },
-]
+// Define the navbar config structure
+interface NavbarConfigData {
+  alwaysVisible: string[];
+  pageSpecific: {
+    [key: string]: string[];
+  };
+}
+
+const navbarConfig: NavbarConfigData = navbarData;
+
+// Define your navigation items here
+const navItems: NavItem[] = [
+  { id: "games", label: "Games", href: "/", icon: Home },
+  { id: "movies", label: "Movies", href: "/movies", icon: Film },
+  { id: "settings", label: "Settings", href: "/settings", icon: Settings }
+];
+
+interface HeaderProps {
+  currentPage?: string;
+  isCompact?: boolean;
+  onBackClick?: () => void;
+  onCategoryChange?: (category: string) => void;
+  onSearch?: (query: string) => void;
+  onFullscreen?: () => void;
+  compactNavbarConfig?: {
+    backButtonMargin?: string;
+    eyeOffButtonMargin?: string;
+    fullscreenButtonMargin?: string;
+  };
+}
 
 export default function Header({
   currentPage,
@@ -41,12 +76,14 @@ export default function Header({
 }: HeaderProps) {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false)
   const [isTabCustomizationOpen, setIsTabCustomizationOpen] = useState(false)
+  const [isNavVisible, setIsNavVisible] = useState(isCompact ? true : false)
   const categoryButtonRef = useRef<HTMLButtonElement>(null)
   const [buttonRect, setButtonRect] = useState<DOMRect | null>(null)
   const [selectedCategory, setSelectedCategory] = useState("All")
-  const [position, setPosition] = useState({ x: 10, y: 10 })
   const router = useRouter()
   const pathname = usePathname()
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const autoHideTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const {
     backButtonMargin = '-mr-0.5',
@@ -68,17 +105,22 @@ export default function Header({
     }
   }
 
-  useEffect(() => {
-    const savedPosition = localStorage.getItem('navbarPosition')
-    if (savedPosition) {
-      setPosition(JSON.parse(savedPosition))
+  const handleMouseEnter = () => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current)
+      hideTimeoutRef.current = null
     }
-  }, [])
+    if (autoHideTimeoutRef.current) {
+      clearTimeout(autoHideTimeoutRef.current)
+      autoHideTimeoutRef.current = null
+    }
+    setIsNavVisible(true)
+  }
 
-  const handleDragStop = (_e: DraggableEvent, data: DraggableData) => {
-    const newPosition = { x: data.x, y: data.y }
-    setPosition(newPosition)
-    localStorage.setItem('navbarPosition', JSON.stringify(newPosition))
+  const handleMouseLeave = () => {
+    hideTimeoutRef.current = setTimeout(() => {
+      setIsNavVisible(false)
+    }, 1000)
   }
 
   useEffect(() => {
@@ -100,156 +142,192 @@ export default function Header({
         document.head.appendChild(newFavicon)
       }
     }
-  }, [])
+
+    if (isCompact) {
+      autoHideTimeoutRef.current = setTimeout(() => {
+        setIsNavVisible(false)
+      }, 2000)
+    }
+
+    return () => {
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current)
+      }
+      if (autoHideTimeoutRef.current) {
+        clearTimeout(autoHideTimeoutRef.current)
+      }
+    }
+  }, [isCompact])
 
   const shouldShowButton = (buttonId: string) => {
-    return navbarConfig.alwaysVisible.includes(buttonId) || 
+    if (!currentPage) return navbarConfig.alwaysVisible.includes(buttonId); // Default for undefined currentPage
+    return navbarConfig.alwaysVisible.includes(buttonId) ||
            navbarConfig.pageSpecific[currentPage]?.includes(buttonId)
   }
 
-  const headerContent = (
-    <div
-      className={`glassmorphism-dark rounded-full flex items-center justify-between ${
-        isCompact ? "px-2 py-1.5" : "px-6 py-3 w-full"
-      }`}
-    >
-      <div className="flex items-center space-x-1">
-        {isCompact ? (
-          <>
+  if (isCompact) {
+    return (
+      <>
+        {/* Corner trigger area */}
+        <div
+          className="fixed top-0 left-0 w-24 h-24 z-50 pointer-events-auto" // Slightly smaller trigger
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        />
+
+        {/* Indicator dot when hidden - Minimalist */}
+        <div
+          className={`fixed top-3 left-3 z-50 transition-all duration-300 ${ // Adjusted position
+            isNavVisible
+              ? 'opacity-0 scale-0 pointer-events-none'
+              : 'opacity-70 scale-100'
+          }`}
+          onMouseEnter={handleMouseEnter} // Allow hover on dot to show menu
+        >
+          <div className="w-1.5 h-1.5 bg-purple-500 rounded-full shadow-sm" />
+        </div>
+
+        {/* Control buttons panel - Minimalist Pill */}
+        <div
+          className={`fixed top-0 left-0 z-50 transition-all duration-300 ease-out ${ // Changed to top-0
+            isNavVisible
+              ? 'opacity-100 translate-x-0 translate-y-0 scale-100'
+              : 'opacity-0 -translate-x-4 -translate-y-4 scale-95 pointer-events-none'
+          }`}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          <div className="mt-3 ml-3 bg-gray-800/80 backdrop-blur-md rounded-full px-2.5 py-1.5 flex items-center space-x-1 shadow-lg border border-gray-700/50">
             <button
               onClick={onBackClick}
-              className={`text-purple-400 w-8 h-8 flex items-center justify-center hover:bg-purple-400/20 rounded-full transition-all duration-300 ${backButtonMargin}`}
+              className={`text-gray-300 w-8 h-8 flex items-center justify-center hover:bg-gray-700/70 hover:text-purple-400 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 ${backButtonMargin}`}
               title="Back to games"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" /> {/* Slightly smaller icons for smaller buttons */}
             </button>
-            <button
-              onClick={() => setIsTabCustomizationOpen(true)}
-              className={`text-purple-400 w-8 h-8 flex items-center justify-center hover:bg-purple-400/20 rounded-full transition-all duration-300 ${eyeOffButtonMargin}`}
-              title="Customize tab appearance"
-            >
-              <EyeOff className="w-5 h-5" />
-            </button>
-          </>
-        ) : (
-          <>
-            <Link href="/" className="flex items-center space-x-3 mr-4">
-              <Cat className="w-6 h-6 text-purple-400" />
-              <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 hidden sm:inline">
-                KittenGames
-              </span>
-            </Link>
 
-            <div className="ml-2 flex items-center space-x-2">
-              {navItems.map((item) => {
-                const Icon = item.icon
-                const isActive = item.id === currentPage
-                return (
-                  <Link
-                    key={item.id}
-                    href={item.href}
-                    className={`relative px-4 py-2 rounded-full flex items-center space-x-2 transition-all duration-300
-                      ${isActive ? 'text-white bg-purple-600/30' : 'text-gray-400 hover:text-white hover:bg-gray-700/30'}`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span className={`transition-all duration-300 origin-left ${isActive ? 'opacity-100 max-w-[100px]' : 'opacity-0 max-w-0 hidden'}`}>
-                      {item.label}
-                    </span>
-                  </Link>
-                )
-              })}
-            </div>
-          </>
-        )}
-      </div>
-      {!isCompact && (
-        <div className="flex items-center space-x-4">
-          {shouldShowButton("requestFeature") && (
-            <a
-              href="https://app.formbricks.com/s/cm6ui6jwh0000jj03onw8dfr7"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white hover:text-purple-400 transition-colors duration-300"
-              title="Request games/features"
-            >
-              <MessageCirclePlus className="w-6 h-6" />
-            </a>
-          )}
-          {shouldShowButton("movies") && <MovieLink />}
-          {shouldShowButton("customizeTab") && (
             <button
               onClick={() => setIsTabCustomizationOpen(true)}
-              className="text-white hover:text-purple-400 transition-colors duration-300"
+              className={`text-gray-300 w-8 h-8 flex items-center justify-center hover:bg-gray-700/70 hover:text-purple-400 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 ${eyeOffButtonMargin}`}
               title="Customize tab appearance"
             >
-              <EyeOff className="w-6 h-6" />
+              <EyeOff className="w-4 h-4" />
             </button>
-          )}
-          {shouldShowButton("categories") && (
-            <div className="relative">
-              <button
-                ref={categoryButtonRef}
-                onClick={handleCategoryClick}
-                onKeyDown={handleCategoryKeyDown}
-                className="flex items-center space-x-2 text-white text-base hover:text-purple-400 transition-colors duration-300"
-                aria-haspopup="true"
-                aria-expanded={isCategoryOpen}
+
+            <button
+              onClick={onFullscreen}
+              className={`text-gray-300 w-8 h-8 flex items-center justify-center hover:bg-gray-700/70 hover:text-purple-400 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 ${fullscreenButtonMargin}`}
+              title="Fullscreen"
+            >
+              <Maximize2 className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <TabCustomizationPopup isOpen={isTabCustomizationOpen} onClose={() => setIsTabCustomizationOpen(false)} />
+      </>
+    )
+  }
+
+  // Full mode - original navbar with cat icon
+  const headerContent = (
+    <div className="bg-gray-800/70 backdrop-blur-md rounded-full flex items-center px-3 py-2 w-full justify-between shadow-lg border border-gray-700/30">
+      <div className="flex items-center space-x-2">
+        <div className="flex items-center justify-center w-8 h-8 flex-shrink-0">
+          <Image
+            src="/cat.svg"
+            alt="KittenGames"
+            width={28} // Slightly adjusted
+            height={28}
+            className="w-7 h-7 opacity-90 hover:opacity-100 transition-opacity duration-200 select-none pointer-events-none"
+            draggable={false}
+          />
+        </div>
+        
+        <div className="flex items-center space-x-0.5">
+          {navItems.map((item) => {
+            const Icon = item.icon
+            const isActive = item.id === currentPage
+            return (
+              <Link
+                key={item.id}
+                href={item.href}
+                className={`relative px-2.5 py-1.5 rounded-full flex items-center space-x-1.5 transition-all duration-200
+                  ${isActive ? 'text-white bg-purple-600/40' : 'text-gray-300 hover:text-white hover:bg-gray-700/50'}`}
               >
-                <span>{selectedCategory}</span>
-                <ChevronDown
-                  className={`w-5 h-5 transition-transform duration-300 ${isCategoryOpen ? "rotate-180" : ""}`}
-                />
-              </button>
-            </div>
-          )}
-          {shouldShowButton("search") && <SearchBar onSearch={onSearch} />}
+                <Icon className="w-4 h-4" /> {/* Adjusted icon size */}
+                <span className={`text-sm transition-all duration-300 origin-left ${isActive ? 'opacity-100 max-w-[100px]' : 'opacity-0 max-w-0 hidden md:inline-block md:opacity-100 md:max-w-[100px]'}`}>
+                  {item.label}
+                </span>
+              </Link>
+            )
+          })}
         </div>
-      )}
-      {isCompact && (
-        <div className="flex items-center space-x-1">
-          <button
-            onClick={onFullscreen}
-            className={`text-purple-400 w-8 h-8 flex items-center justify-center hover:bg-purple-400/20 rounded-full transition-all duration-300 ${fullscreenButtonMargin}`}
-            title="Fullscreen"
+      </div>
+      
+      <div className="flex items-center space-x-3">
+        {shouldShowButton("requestFeature") && (
+          <a
+            href="https://app.formbricks.com/s/cm6ui6jwh0000jj03onw8dfr7"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-300 hover:text-purple-400 transition-colors duration-200 p-1.5 rounded-full hover:bg-gray-700/50"
+            title="Request games/features"
           >
-            <Maximize2 className="w-5 h-5" />
+            <MessageCirclePlus className="w-5 h-5" />
+          </a>
+        )}
+        {shouldShowButton("movies") && <MovieLink />}
+        {shouldShowButton("customizeTab") && (
+          <button
+            onClick={() => setIsTabCustomizationOpen(true)}
+            className="text-gray-300 hover:text-purple-400 transition-colors duration-200 p-1.5 rounded-full hover:bg-gray-700/50"
+            title="Customize tab appearance"
+          >
+            <EyeOff className="w-5 h-5" />
           </button>
-        </div>
-      )}
+        )}
+        {shouldShowButton("categories") && (
+          <div className="relative">
+            <button
+              ref={categoryButtonRef}
+              onClick={handleCategoryClick}
+              onKeyDown={handleCategoryKeyDown}
+              className="flex items-center space-x-1.5 text-gray-300 text-sm hover:text-purple-400 transition-colors duration-200 px-2 py-1.5 rounded-full hover:bg-gray-700/50"
+              aria-haspopup="true"
+              aria-expanded={isCategoryOpen}
+            >
+              <span>{selectedCategory}</span>
+              <ChevronDown
+                className={`w-4 h-4 transition-transform duration-200 ${isCategoryOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+          </div>
+        )}
+        {shouldShowButton("search") && <SearchBar onSearch={onSearch} />}
+      </div>
     </div>
   )
 
   return (
-    <>
-      {isCompact ? (
-        <Draggable
-          bounds="parent"
-          handle=".glassmorphism-dark"
-          defaultPosition={position}
-          onStop={handleDragStop}
-        >
-          <header className="fixed z-40">
-            {headerContent}
-          </header>
-        </Draggable>
-      ) : (
-        <header className={`fixed top-4 z-40 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl`}>
-          {headerContent}
-        </header>
-      )}
-
+    <div className="fixed top-0 left-0 right-0 z-40">
+      <div className="px-3 pt-3">
+        {headerContent}
+      </div>
+      
       <CategoryDropdown
         isOpen={isCategoryOpen}
         onClose={() => setIsCategoryOpen(false)}
         onCategoryChange={(category) => {
           setSelectedCategory(category)
-          onCategoryChange?.(category)
+          if (onCategoryChange) onCategoryChange(category);
+          setIsCategoryOpen(false)
         }}
         anchorRect={buttonRect}
         selectedCategory={selectedCategory}
       />
 
       <TabCustomizationPopup isOpen={isTabCustomizationOpen} onClose={() => setIsTabCustomizationOpen(false)} />
-    </>
+    </div>
   )
 }

@@ -1,19 +1,7 @@
-import { useEffect, useRef } from "react"
-import { createPortal } from "react-dom"
-import { Hexagon, Joystick, Swords, UsersRound, Footprints, Crosshair, PuzzleIcon as PuzzlePiece, Gamepad, Clock, Car } from "lucide-react"
+"use client"
 
-const categories = [
-  { name: "All", icon: <Hexagon className="w-5 h-5" /> },
-  { name: "Battle", icon: <Swords className="w-5 h-5" /> },
-  { name: "Platformer", icon: <Footprints className="w-5 h-5" /> },
-  { name: "Shooter", icon: <Crosshair className="w-5 h-5" /> },
-  { name: "Puzzle", icon: <PuzzlePiece className="w-5 h-5" /> },
-  { name: "Skill", icon: <Gamepad className="w-5 h-5" /> },
-  { name: "Idle", icon: <Clock className="w-5 h-5" /> },
-  { name: "Racing", icon: <Car className="w-5 h-5" /> },
-  { name: "Retro", icon: <Joystick className="w-5 h-5" /> },
-  { name: "Multiplayer", icon: <UsersRound className="w-5 h-5" /> },
-]
+import { useEffect, useRef } from "react"
+import { Check, Hexagon, Swords, Footprints, Crosshair, Puzzle, Gamepad2, Clock, Car, Gamepad, Users } from "lucide-react"
 
 interface CategoryDropdownProps {
   isOpen: boolean
@@ -22,6 +10,19 @@ interface CategoryDropdownProps {
   anchorRect: DOMRect | null
   selectedCategory: string
 }
+
+const categories = [
+  { name: "All", icon: Hexagon },
+  { name: "Battle", icon: Swords },
+  { name: "Platformer", icon: Footprints },
+  { name: "Shooter", icon: Crosshair },
+  { name: "Puzzle", icon: Puzzle },
+  { name: "Skill", icon: Gamepad2 },
+  { name: "Idle", icon: Clock },
+  { name: "Racing", icon: Car },
+  { name: "Retro", icon: Gamepad },
+  { name: "Multiplayer", icon: Users },
+]
 
 export default function CategoryDropdown({
   isOpen,
@@ -39,7 +40,7 @@ export default function CategoryDropdown({
       }
     }
 
-    const handleEscapeKey = (event: KeyboardEvent) => {
+    const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onClose()
       }
@@ -47,58 +48,55 @@ export default function CategoryDropdown({
 
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside)
-      document.addEventListener("keydown", handleEscapeKey)
+      document.addEventListener("keydown", handleEscape)
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
-      document.removeEventListener("keydown", handleEscapeKey)
+      document.removeEventListener("keydown", handleEscape)
     }
   }, [isOpen, onClose])
 
   if (!isOpen || !anchorRect) return null
 
   const dropdownStyle = {
-    position: "fixed",
-    top: `${anchorRect.bottom + 12}px`,
-    left: `${anchorRect.right - 220}px`,
-    width: "14rem",
-    maxHeight: "calc(100vh - 140px)",
-    zIndex: 9999,
-  } as const
+    position: "fixed" as const,
+    top: anchorRect.bottom + 8,
+    left: anchorRect.left,
+    minWidth: anchorRect.width,
+  }
 
-  return createPortal(
+  const handleCategorySelect = (category: string) => {
+    onCategoryChange(category)
+    onClose()
+  }
+
+  return (
     <div
       ref={dropdownRef}
-      className="bg-gray-800/95 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-700/60 overflow-hidden animate-dropdown-fade"
       style={dropdownStyle}
+      className="z-50 bg-gray-900 rounded-xl border border-gray-800 shadow-2xl overflow-hidden min-w-48"
     >
-      <div className="py-2">
-        {categories.map((category) => (
-          <button
-            key={category.name}
-            onClick={() => {
-              onCategoryChange(category.name)
-              onClose()
-            }}
-            className={`
-              flex items-center w-full px-4 py-3 text-base font-medium group 
-              transition-all duration-200 ease-in-out 
-              ${selectedCategory === category.name 
-                ? "bg-purple-600/90 text-white" 
-                : "text-gray-300 hover:bg-gray-700/80 hover:text-white"}
-              focus:outline-none focus:ring-2 focus:ring-purple-500/60
-            `}
-          >
-            <span className={`mr-4 opacity-80 group-hover:opacity-100 transition-opacity 
-              ${selectedCategory === category.name ? 'text-white' : 'text-gray-400'}`}>
-              {category.icon}
-            </span>
-            {category.name}
-          </button>
-        ))}
+      <div className="max-h-64 overflow-y-auto">
+        {categories.map((category) => {
+          const Icon = category.icon
+          return (
+            <button
+              key={category.name}
+              onClick={() => handleCategorySelect(category.name)}
+              className="w-full px-4 py-3 text-left text-white hover:bg-gray-800 transition-colors duration-200 flex items-center justify-between border-b border-gray-800/50 last:border-b-0"
+            >
+              <div className="flex items-center space-x-3">
+                <Icon className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                <span className="font-medium">{category.name}</span>
+              </div>
+              {selectedCategory === category.name && (
+                <Check className="w-4 h-4 text-purple-400 flex-shrink-0" />
+              )}
+            </button>
+          )
+        })}
       </div>
-    </div>,
-    document.body,
+    </div>
   )
 }

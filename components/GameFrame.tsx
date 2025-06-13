@@ -17,6 +17,7 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 export default function GameFrame({ slug }: { slug: string }) {
   const [game, setGame] = useState<Game | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isDragging, setIsDragging] = useState(false)
 
   // Memoize the game search to avoid unnecessary re-computations
   const findGameInCache = useMemo(() => {
@@ -86,6 +87,21 @@ export default function GameFrame({ slug }: { slug: string }) {
     }
   }, [isLoading]);
 
+  // Listen for drag events from the header
+  useEffect(() => {
+    const handleDragStart = () => setIsDragging(true);
+    const handleDragEnd = () => setIsDragging(false);
+
+    // Listen for custom events from the header
+    window.addEventListener('header-drag-start', handleDragStart);
+    window.addEventListener('header-drag-end', handleDragEnd);
+
+    return () => {
+      window.removeEventListener('header-drag-start', handleDragStart);
+      window.removeEventListener('header-drag-end', handleDragEnd);
+    };
+  }, []);
+
   if (isLoading) {
     return (
       <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-gray-900">
@@ -108,11 +124,16 @@ export default function GameFrame({ slug }: { slug: string }) {
   // Only render iframe if not about:blank or new-tab
   return (
     <div className="fixed inset-0 w-full h-full bg-gray-900">
+      {/* Dragging overlay - blocks iframe interactions during drag */}
+      {isDragging && (
+        <div className="absolute inset-0 z-40 bg-transparent pointer-events-auto" />
+      )}
+      
       <iframe
         id="game-iframe"
         src={game.url}
         title={game.name}
-        className="w-full h-full border-0"
+        className={`w-full h-full border-0 ${isDragging ? 'pointer-events-none' : ''}`}
         allowFullScreen={true}
         tabIndex={0}
         allow="keyboard; fullscreen"
