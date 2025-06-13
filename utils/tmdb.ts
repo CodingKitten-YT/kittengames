@@ -42,25 +42,37 @@ export const getTrendingAll = async (timeWindow: 'day' | 'week' = 'week'): Promi
 };
 
 export const searchMovies = async (query: string): Promise<TMDBResponse> => {
-  const response = await tmdbAxios.get('/search/movie', {
-    params: {
-      query,
-      language: 'en-US',
-      include_adult: false,
+  const url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}&page=1`;
+  
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_TOKEN}`,
+      accept: 'application/json',
     },
   });
-  return response.data;
+
+  if (!response.ok) {
+    throw new Error('Failed to search movies');
+  }
+
+  return response.json();
 };
 
 export const searchTVShows = async (query: string): Promise<TMDBResponse> => {
-  const response = await tmdbAxios.get('/search/tv', {
-    params: {
-      query,
-      language: 'en-US',
-      include_adult: false,
+  const url = `https://api.themoviedb.org/3/search/tv?query=${encodeURIComponent(query)}&page=1`;
+  
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_TOKEN}`,
+      accept: 'application/json',
     },
   });
-  return response.data;
+
+  if (!response.ok) {
+    throw new Error('Failed to search TV shows');
+  }
+
+  return response.json();
 };
 
 export const getPosterUrl = (path: string | null, size: 'w342' | 'w500' | 'w780' | 'original' = 'w500') => {

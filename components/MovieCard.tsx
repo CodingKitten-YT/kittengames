@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Star, Calendar, Play, Film, Tv } from 'lucide-react';
 import { Movie, TVShow } from '../types/tmdb';
 import { getPosterUrl } from '../utils/tmdb';
+import { useRouter } from 'next/navigation';
 
 interface MovieCardProps {
   item: Movie | TVShow;
@@ -14,10 +15,11 @@ const isMovie = (item: Movie | TVShow): item is Movie => {
 };
 
 export default function MovieCard({ item, onClick }: MovieCardProps) {
+  const router = useRouter();
   const title = isMovie(item) ? item.title : item.name;
   const releaseDate = isMovie(item) ? item.release_date : item.first_air_date;
   const posterUrl = getPosterUrl(item.poster_path, 'w500');
-  const itemType = isMovie(item) ? 'movie' : 'series';
+  const itemType = isMovie(item) ? 'movie' : 'show';
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'TBA';
@@ -28,10 +30,19 @@ export default function MovieCard({ item, onClick }: MovieCardProps) {
     return rating.toFixed(1);
   };
 
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick();
+    }
+    
+    // Navigate to detail page
+    router.push(`/movies/${itemType}/${item.id}`);
+  };
+
   return (
     <div 
-      className="group relative bg-gray-900/70 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 ease-out cursor-pointer hover:scale-[1.02] hover:-translate-y-2 hover:border-gray-600/60"
-      onClick={onClick}
+      className="group relative bg-gray-900/70 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 ease-out cursor-pointer hover:scale-[1.02] hover:border-gray-600/60"
+      onClick={handleCardClick}
     >
       {/* Type Badge */}
       <div className="absolute top-3 left-3 z-20">

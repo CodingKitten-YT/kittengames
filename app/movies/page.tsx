@@ -167,11 +167,7 @@ export default function Movies() {
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
               {trendingItems.map((item) => (
-                <MovieCard
-                  key={item.id}
-                  item={item}
-                  onClick={() => console.log("Item clicked:", item)}
-                />
+                <MovieCard key={item.id} item={item} />
               ))}
             </div>
           </TabsContent>

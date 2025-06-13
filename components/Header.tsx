@@ -11,7 +11,7 @@ import {
   Gamepad2,
   Settings,
   Search,
-  ChevronDown, // Only import once
+  ChevronDown,
   EyeOff,
   ArrowLeft,
   Maximize2,
@@ -19,12 +19,11 @@ import {
   Film,
 } from "lucide-react"
 
-// Fix incorrect import paths
-import SearchBar from "./SearchBar" // Changed from "./Search"
+import SearchBar from "./SearchBar"
+import MovieSearchBar from "./MovieSearchBar" // Add this import
 import CategoryDropdown from "./CategoryDropdown"
 import TabCustomizationPopup from "./TabCustomizationPopup"
-import MovieLink from "./MovieLink"
-import navbarData from "../config/navbar.json" // Import JSON file
+import navbarData from "../config/navbar.json"
 
 // Define NavItem interface for navigation items
 interface NavItem {
@@ -121,6 +120,15 @@ export default function Header({
     hideTimeoutRef.current = setTimeout(() => {
       setIsNavVisible(false)
     }, 1000)
+  }
+
+  // Handle movie search result clicks
+  const handleMovieSearchResult = (item: any, type: 'movie' | 'tv') => {
+    if (type === 'movie') {
+      router.push(`/movies/movie/${item.id}`)
+    } else {
+      router.push(`/movies/show/${item.id}`)
+    }
   }
 
   useEffect(() => {
@@ -229,7 +237,7 @@ export default function Header({
     )
   }
 
-  // Full mode - original navbar with cat icon
+  // Full mode - updated to include movie search
   const headerContent = (
     <div className="bg-gray-800/70 backdrop-blur-md rounded-full flex items-center px-3 py-2 w-full justify-between shadow-lg border border-gray-700/30">
       <div className="flex items-center space-x-2">
@@ -277,7 +285,6 @@ export default function Header({
             <MessageCirclePlus className="w-5 h-5" />
           </a>
         )}
-        {shouldShowButton("movies") && <MovieLink />}
         {shouldShowButton("customizeTab") && (
           <button
             onClick={() => setIsTabCustomizationOpen(true)}
@@ -305,6 +312,11 @@ export default function Header({
           </div>
         )}
         {shouldShowButton("search") && <SearchBar onSearch={onSearch} />}
+        {shouldShowButton("movieSearch") && (
+          <div className="w-64">
+            <MovieSearchBar onResultClick={handleMovieSearchResult} />
+          </div>
+        )}
       </div>
     </div>
   )
