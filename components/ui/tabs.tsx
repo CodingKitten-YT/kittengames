@@ -11,7 +11,7 @@ const TabsList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
-    className={`inline-flex h-12 items-center rounded-xl bg-gray-900 border border-gray-700/50 p-1.5 text-gray-400 shadow-lg ${className}`}
+    className={`inline-flex h-12 items-center rounded-xl bg-gray-800/60 backdrop-blur-sm border border-gray-600/40 p-1.5 text-gray-400 shadow-lg ${className}`}
     {...props}
   />
 ))
@@ -25,12 +25,13 @@ const TabsTrigger = React.forwardRef<
     ref={ref}
     className={`
       relative inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium 
-      transition-all duration-300 ease-out flex-1 min-w-0
-      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900
+      transition-all duration-200 ease-out flex-1 min-w-0
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50 focus-visible:ring-offset-1
       disabled:pointer-events-none disabled:opacity-50
-      hover:text-white hover:bg-gray-700/40 hover:scale-[1.02] hover:shadow-sm
-      data-[state=active]:bg-gray-700/60 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:border data-[state=active]:border-gray-600/50
+      hover:text-white hover:bg-gray-700/50
+      data-[state=active]:bg-gray-700/70 data-[state=active]:text-white data-[state=active]:shadow-sm
       transform-gpu
+      [&>svg]:flex-shrink-0 [&>svg]:w-5 [&>svg]:h-5
       ${className}
     `}
     {...props}
@@ -45,9 +46,9 @@ const TabsContent = React.forwardRef<
   <TabsPrimitive.Content
     ref={ref}
     className={`
-      mt-6 
-      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950
-      animate-in fade-in-50 slide-in-from-bottom-2 duration-200
+      mt-6
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50 focus-visible:ring-offset-1
+      animate-in fade-in-50 duration-200
       ${className}
     `}
     {...props}

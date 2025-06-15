@@ -17,6 +17,7 @@ import {
   Maximize2,
   MessageCirclePlus,
   Film,
+  Gamepad,
 } from "lucide-react"
 
 import SearchBar from "./SearchBar"
@@ -45,7 +46,7 @@ const navbarConfig: NavbarConfigData = navbarData;
 
 // Define your navigation items here
 const navItems: NavItem[] = [
-  { id: "games", label: "Games", href: "/", icon: Home },
+  { id: "games", label: "Games", href: "/", icon: Gamepad },
   { id: "movies", label: "Movies", href: "/movies", icon: Film },
   { id: "settings", label: "Settings", href: "/settings", icon: Settings }
 ];
