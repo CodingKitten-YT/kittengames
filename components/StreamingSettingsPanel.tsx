@@ -1,14 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronDown, Check, AlertTriangle, Globe, Zap, Shield, Clock } from "lucide-react"
+import { ChevronDown, Check, AlertTriangle, Globe, Zap, Shield, Clock, LucideIcon } from "lucide-react"
 
 interface StreamingDomain {
   id: string
   name: string
   domain: string
   description: string
-  icon: React.ComponentType<{ className?: string }>
+  icon: LucideIcon
 }
 
 const streamingDomains: StreamingDomain[] = [

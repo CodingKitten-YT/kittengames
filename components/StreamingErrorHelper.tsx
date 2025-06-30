@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { AlertTriangle, Settings, RefreshCw, ExternalLink } from "lucide-react"
+import { AlertTriangle, Settings, RefreshCw, ExternalLink, LucideIcon } from "lucide-react"
 import { getStreamingSettings } from "./StreamingSettingsPanel"
 import { useRouter } from "next/navigation"
 
@@ -11,7 +11,13 @@ interface StreamingErrorHelperProps {
   type?: 'movie' | 'tv'
 }
 
-const quickDomains = [
+interface QuickDomain {
+  id: string
+  name: string
+  domain: string
+}
+
+const quickDomains: QuickDomain[] = [
   { id: "vidsrc-xyz", name: "VidSrc XYZ", domain: "vidsrc.xyz" },
   { id: "vidsrc-in", name: "VidSrc IN", domain: "vidsrc.in" },
   { id: "vidsrc-pm", name: "VidSrc PM", domain: "vidsrc.pm" },

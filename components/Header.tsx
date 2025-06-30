@@ -312,7 +312,7 @@ export default function Header({
             </button>
           </div>
         )}
-        {shouldShowButton("search") && <SearchBar onSearch={onSearch} />}
+        {shouldShowButton("search") && <SearchBar onSearch={onSearch || (() => {})} />}
         {shouldShowButton("movieSearch") && (
           <div className="w-64">
             <MovieSearchBar onResultClick={handleMovieSearchResult} />
