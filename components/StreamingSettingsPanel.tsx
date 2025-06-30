@@ -8,8 +8,6 @@ interface StreamingDomain {
   name: string
   domain: string
   description: string
-  speed: "fast" | "medium" | "slow"
-  reliability: "high" | "medium" | "low"
   icon: React.ComponentType<{ className?: string }>
 }
 
@@ -19,8 +17,6 @@ const streamingDomains: StreamingDomain[] = [
     name: "VidSrc XYZ",
     domain: "vidsrc.xyz",
     description: "Primary streaming source",
-    speed: "fast",
-    reliability: "high",
     icon: Globe
   },
   {
@@ -28,8 +24,6 @@ const streamingDomains: StreamingDomain[] = [
     name: "VidSrc IN",
     domain: "vidsrc.in",
     description: "Alternative streaming source",
-    speed: "fast",
-    reliability: "high",
     icon: Zap
   },
   {
@@ -37,8 +31,6 @@ const streamingDomains: StreamingDomain[] = [
     name: "VidSrc PM",
     domain: "vidsrc.pm",
     description: "Mirror streaming source",
-    speed: "medium",
-    reliability: "medium",
     icon: Shield
   },
   {
@@ -46,8 +38,6 @@ const streamingDomains: StreamingDomain[] = [
     name: "VidSrc NET",
     domain: "vidsrc.net",
     description: "Backup streaming source",
-    speed: "medium",
-    reliability: "medium",
     icon: Clock
   }
 ]
@@ -87,11 +77,6 @@ export function getStreamingSettings(): StreamingSettings {
   }
 }
 
-export function saveStreamingSettings(settings: StreamingSettings) {
-  if (typeof window === "undefined") return
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
-}
-
 export function getStreamingUrl(type: 'movie' | 'tv', id: string, season?: number, episode?: number): string {
   const settings = getStreamingSettings()
   const domain = streamingDomains.find(d => d.id === settings.selectedDomain)?.domain || "vidsrc.xyz"
@@ -122,7 +107,9 @@ export default function StreamingSettingsPanel() {
 
   useEffect(() => {
     if (isLoaded) {
-      saveStreamingSettings(settings)
+      if (typeof window !== "undefined") {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
+      }
     }
   }, [settings, isLoaded])
 
@@ -207,52 +194,53 @@ export default function StreamingSettingsPanel() {
               </button>
               
               {isDropdownOpen && (
-                <div className="absolute z-10 w-full mt-1 bg-gray-900 rounded-md shadow-lg border border-gray-800 animate-in fade-in slide-in-from-top-2 duration-150">              {streamingDomains.map((domain) => {
-                const pingResult = pingResults[domain.id]
-                return (
-                  <button
-                    key={domain.id}
-                    type="button"
-                    onClick={() => handleDomainChange(domain.id)}
-                    className="w-full px-4 py-3 text-left text-gray-100 hover:bg-gray-800 transition flex items-center justify-between border-b border-gray-800 last:border-b-0"
-                  >
-                    <div className="flex items-center space-x-3 flex-1">
-                      <domain.icon className="w-5 h-5 text-purple-400 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium">{domain.name}</div>
-                        <div className="text-xs text-gray-400">{domain.domain}</div>
-                        {pingResult && (
-                          <div className="flex items-center space-x-2 mt-1">
-                            {pingResult.testing ? (
-                              <span className="text-xs text-yellow-400">Testing...</span>
-                            ) : pingResult.accessible ? (
-                              <span className="text-xs text-green-400">{pingResult.ping}ms</span>
-                            ) : (
-                              <span className="text-xs text-red-400">Unavailable</span>
+                <div className="absolute z-10 w-full mt-1 bg-gray-900 rounded-md shadow-lg border border-gray-800 animate-in fade-in slide-in-from-top-2 duration-150">
+                  {streamingDomains.map((domain) => {
+                    const pingResult = pingResults[domain.id]
+                    return (
+                      <button
+                        key={domain.id}
+                        type="button"
+                        onClick={() => handleDomainChange(domain.id)}
+                        className="w-full px-4 py-3 text-left text-gray-100 hover:bg-gray-800 transition flex items-center justify-between border-b border-gray-800 last:border-b-0"
+                      >
+                        <div className="flex items-center space-x-3 flex-1">
+                          <domain.icon className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium">{domain.name}</div>
+                            <div className="text-xs text-gray-400">{domain.domain}</div>
+                            {pingResult && (
+                              <div className="flex items-center space-x-2 mt-1">
+                                {pingResult.testing ? (
+                                  <span className="text-xs text-yellow-400">Testing...</span>
+                                ) : pingResult.accessible ? (
+                                  <span className="text-xs text-green-400">{pingResult.ping}ms</span>
+                                ) : (
+                                  <span className="text-xs text-red-400">Unavailable</span>
+                                )}
+                              </div>
                             )}
                           </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {!pingResult && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            testDomainPing(domain)
-                          }}
-                          className="px-2 py-1 text-xs bg-purple-600 hover:bg-purple-700 rounded"
-                        >
-                          Test
-                        </button>
-                      )}
-                      {settings.selectedDomain === domain.id && (
-                        <Check className="w-4 h-4 text-purple-400 flex-shrink-0" />
-                      )}
-                    </div>
-                  </button>
-                )
-              })}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {!pingResult && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                testDomainPing(domain)
+                              }}
+                              className="px-2 py-1 text-xs bg-purple-600 hover:bg-purple-700 rounded"
+                            >
+                              Test
+                            </button>
+                          )}
+                          {settings.selectedDomain === domain.id && (
+                            <Check className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                          )}
+                        </div>
+                      </button>
+                    )
+                  })}
                 </div>
               )}
             </div>
