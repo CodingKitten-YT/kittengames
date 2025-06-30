@@ -4,8 +4,10 @@ import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Header from "../../../../components/Header";
+import StreamingErrorHelper from "../../../../components/StreamingErrorHelper";
 import { Movie } from "../../../../types/tmdb";
 import { getPosterUrl, getBackdropUrl } from "../../../../utils/tmdb";
+import { getStreamingUrl } from "../../../../components/StreamingSettingsPanel";
 import { Loader2, Star, Calendar, Clock, ChevronLeft, Play } from "lucide-react";
 import axios from "axios";
 
@@ -20,11 +22,13 @@ interface MovieDetails extends Movie {
 }
 
 export default function MovieDetail() {
-  const { slug } = useParams();
+  const { slug } = useParams() as { slug: string };
   const router = useRouter();
   const [movie, setMovie] = useState<MovieDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [showPlayer, setShowPlayer] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [embedUrl, setEmbedUrl] = useState("");
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -52,16 +56,40 @@ export default function MovieDetail() {
     }
   }, [slug]);
 
+  useEffect(() => {
+    if (slug) {
+      const url = getStreamingUrl('movie', slug);
+      setEmbedUrl(url);
+    }
+  }, [slug]);
+
   const handleBackClick = () => {
     router.push("/movies");
   };
 
   const handlePlayClick = () => {
     setShowPlayer(true);
+    setShowError(false);
   };
 
-  const getEmbedUrl = () => {
-    return `https://player.embed-api.stream/?id=${slug}&type=movie`;
+  const handleIframeError = () => {
+    setShowError(true);
+  };
+
+  const handleRetry = () => {
+    setShowError(false);
+    setShowPlayer(false);
+    setTimeout(() => {
+      const url = getStreamingUrl('movie', slug);
+      setEmbedUrl(url);
+      setShowPlayer(true);
+    }, 100);
+  };
+
+  const handleDomainSwitch = () => {
+    const url = getStreamingUrl('movie', slug);
+    setEmbedUrl(url);
+    setShowError(false);
   };
 
   const formatRuntime = (minutes: number) => {
@@ -267,12 +295,13 @@ export default function MovieDetail() {
               <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">
                 {showPlayer ? (
                   <iframe
-                    src={getEmbedUrl()}
+                    src={embedUrl}
                     className="w-full h-full"
                     frameBorder="0"
                     allow="autoplay; fullscreen; picture-in-picture"
                     allowFullScreen
                     title={movie.title}
+                    onError={handleIframeError}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 relative">
@@ -308,8 +337,17 @@ export default function MovieDetail() {
                 )}
               </div>
               
+              {/* Error Helper */}
+              {showError && (
+                <StreamingErrorHelper
+                  type="movie"
+                  onRetry={handleRetry}
+                  onDomainSwitch={handleDomainSwitch}
+                />
+              )}
+              
               {/* Player Controls */}
-              {showPlayer && (
+              {showPlayer && !showError && (
                 <div className="flex justify-between items-center mt-4 text-gray-400 text-sm">
                   <div>
                     <p>Now playing: <span className="text-white">{movie.title}</span></p>

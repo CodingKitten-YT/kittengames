@@ -1,22 +1,26 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import Header from "../../components/Header"
 import {
   Settings as SettingsIcon,
   EyeOff as CloakIcon,
   Rocket as LaunchIcon,
-  Shield as ShieldIcon, // This import seems unused in the provided context, but keeping it if used elsewhere
-  Info as InfoIcon,   // This import seems unused, but keeping it
+  Shield as ShieldIcon,
+  Play as StreamingIcon,
+  Info as InfoIcon,
 } from "lucide-react"
 import CloakSettingsPanel from "../../components/CloakSettingsPanel"
 import GameLaunchSettingsPanel from "../../components/GameLaunchSettingsPanel"
 import GeneralSettingsPanel from "../../components/GeneralSettingsPanel"
+import StreamingSettingsPanel from "../../components/StreamingSettingsPanel"
 
 const categories = [
   { key: "general", label: "General", icon: <SettingsIcon className="w-5 h-5" /> },
   { key: "cloak", label: "Cloak", icon: <CloakIcon className="w-5 h-5" /> },
   { key: "hotkeys", label: "Game Launch", icon: <LaunchIcon className="w-5 h-5" /> },
+  { key: "streaming", label: "Streaming", icon: <StreamingIcon className="w-5 h-5" /> },
 ]
 
 function CategoryOptions({ selected }: { selected: string }) {
@@ -27,14 +31,24 @@ function CategoryOptions({ selected }: { selected: string }) {
       return <CloakSettingsPanel />
     case "hotkeys":
       return <GameLaunchSettingsPanel />
+    case "streaming":
+      return <StreamingSettingsPanel />
     default:
       return <div>Select a category.</div>
   }
 }
 
 export default function Settings() {
+  const searchParams = useSearchParams()
   const [selected, setSelected] = useState(categories[0].key)
   const currentCategory = categories.find(c => c.key === selected);
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab')
+    if (tabParam && categories.find(cat => cat.key === tabParam)) {
+      setSelected(tabParam)
+    }
+  }, [searchParams])
 
   return (
     <div className="min-h-screen bg-gray-950">

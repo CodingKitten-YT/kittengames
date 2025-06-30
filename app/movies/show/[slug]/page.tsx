@@ -4,8 +4,10 @@ import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Header from "../../../../components/Header";
+import StreamingErrorHelper from "../../../../components/StreamingErrorHelper";
 import { TVShow } from "../../../../types/tmdb";
 import { getPosterUrl, getBackdropUrl } from "../../../../utils/tmdb";
+import { getStreamingUrl } from "../../../../components/StreamingSettingsPanel";
 import { Loader2, Star, Calendar, LayoutList, ChevronLeft, Play } from "lucide-react";
 import axios from "axios";
 
@@ -17,13 +19,16 @@ interface Season {
 }
 
 export default function ShowDetail() {
-  const { slug } = useParams();
+  const params = useParams();
+  const slug = params?.slug as string;
   const router = useRouter();
   const [show, setShow] = useState<TVShow | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [showPlayer, setShowPlayer] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [embedUrl, setEmbedUrl] = useState("");
 
   useEffect(() => {
     const fetchShowDetails = async () => {
@@ -51,16 +56,40 @@ export default function ShowDetail() {
     }
   }, [slug]);
 
+  useEffect(() => {
+    if (slug) {
+      const url = getStreamingUrl('tv', slug, selectedSeason, selectedEpisode);
+      setEmbedUrl(url);
+    }
+  }, [slug, selectedSeason, selectedEpisode]);
+
   const handleBackClick = () => {
     router.push("/movies");
   };
 
   const handlePlayClick = () => {
     setShowPlayer(true);
+    setShowError(false);
   };
 
-  const getEmbedUrl = () => {
-    return `https://player.embed-api.stream/?id=${slug}&s=${selectedSeason}&e=${selectedEpisode}`;
+  const handleIframeError = () => {
+    setShowError(true);
+  };
+
+  const handleRetry = () => {
+    setShowError(false);
+    setShowPlayer(false);
+    setTimeout(() => {
+      const url = getStreamingUrl('tv', slug, selectedSeason, selectedEpisode);
+      setEmbedUrl(url);
+      setShowPlayer(true);
+    }, 100);
+  };
+
+  const handleDomainSwitch = () => {
+    const url = getStreamingUrl('tv', slug, selectedSeason, selectedEpisode);
+    setEmbedUrl(url);
+    setShowError(false);
   };
 
   if (loading) {
@@ -154,25 +183,25 @@ export default function ShowDetail() {
                 {/* Show Info */}
                 <div className="max-w-xl">
                   <h1 className="text-3xl md:text-4xl font-bold mb-4">
-                    {show.name}
+                    {show?.name}
                   </h1>
                   <div className="flex flex-wrap items-center gap-4 mb-4">
                     <div className="flex items-center space-x-1">
                       <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                       <span className="text-lg font-medium">
-                        {show.vote_average.toFixed(1)}
+                        {show?.vote_average.toFixed(1)}
                       </span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <Calendar className="w-5 h-5 text-gray-400" />
                       <span className="text-lg">
-                        {new Date(show.first_air_date).getFullYear()}
+                        {show?.first_air_date ? new Date(show.first_air_date).getFullYear() : 'N/A'}
                       </span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <LayoutList className="w-5 h-5 text-gray-400" />
                       <span className="text-lg">
-                        {show.number_of_seasons
+                        {show?.number_of_seasons
                           ? `${show.number_of_seasons} Season${
                               show.number_of_seasons > 1 ? "s" : ""
                             }`
@@ -181,7 +210,7 @@ export default function ShowDetail() {
                     </div>
                   </div>
                   <p className="text-base text-gray-300 leading-relaxed mb-6">
-                    {show.overview}
+                    {show?.overview}
                   </p>
 
                   {/* Season/Episode Selector */}
@@ -193,10 +222,14 @@ export default function ShowDetail() {
                         </label>
                         <select
                           value={selectedSeason}
-                          onChange={(e) => setSelectedSeason(Number(e.target.value))}
+                          onChange={(e) => {
+                            setSelectedSeason(Number(e.target.value));
+                            setSelectedEpisode(1); // Reset to episode 1 when changing season
+                            setShowPlayer(false); // Close player to show new selection
+                          }}
                           className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500"
                         >
-                          {Array.from({ length: show.number_of_seasons || 1 }, (_, i) => (
+                          {Array.from({ length: show?.number_of_seasons || 1 }, (_, i) => (
                             <option key={i + 1} value={i + 1}>
                               Season {i + 1}
                             </option>
@@ -209,7 +242,10 @@ export default function ShowDetail() {
                         </label>
                         <select
                           value={selectedEpisode}
-                          onChange={(e) => setSelectedEpisode(Number(e.target.value))}
+                          onChange={(e) => {
+                            setSelectedEpisode(Number(e.target.value));
+                            setShowPlayer(false); // Close player to show new selection
+                          }}
                           className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500"
                         >
                           {/* Default to 20 episodes per season - you could fetch actual episode count from API */}
@@ -237,15 +273,19 @@ export default function ShowDetail() {
                   <div className="mt-2 space-y-2 text-sm">
                     <div className="flex">
                       <span className="w-32 text-gray-400">Original Name</span>
-                      <span>{show.original_name}</span>
+                      <span>{show?.original_name}</span>
                     </div>
                     <div className="flex">
                       <span className="w-32 text-gray-400">First Air Date</span>
-                      <span>{show.first_air_date}</span>
+                      <span>{show?.first_air_date}</span>
                     </div>
                     <div className="flex">
                       <span className="w-32 text-gray-400">Origin Country</span>
-                      <span>{show.origin_country?.join(", ") || "N/A"}</span>
+                      <span>{show?.origin_country?.join(", ") || "N/A"}</span>
+                    </div>
+                    <div className="flex">
+                      <span className="w-32 text-gray-400">TMDB ID</span>
+                      <span>{slug}</span>
                     </div>
                   </div>
                 </div>
@@ -257,12 +297,13 @@ export default function ShowDetail() {
               <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">
                 {showPlayer ? (
                   <iframe
-                    src={getEmbedUrl()}
+                    src={embedUrl}
                     className="w-full h-full"
                     frameBorder="0"
                     allow="autoplay; fullscreen; picture-in-picture"
                     allowFullScreen
-                    title={`${show.name} - Season ${selectedSeason} Episode ${selectedEpisode}`}
+                    title={`${show?.name} - Season ${selectedSeason} Episode ${selectedEpisode}`}
+                    onError={handleIframeError}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
@@ -300,6 +341,42 @@ export default function ShowDetail() {
             </div>
           </div>
         </section>
+
+        {/* Error Overlay */}
+        {showError && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
+            <div className="max-w-md w-full p-6 bg-gray-800 rounded-lg shadow-lg">
+              <h2 className="text-xl font-semibold text-white mb-4">
+                Streaming Error
+              </h2>
+              <p className="text-gray-400 mb-4">
+                Sorry, we encountered an error while trying to stream this episode.
+              </p>
+              <div className="flex gap-4">
+                <button
+                  onClick={handleRetry}
+                  className="flex-1 px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition"
+                >
+                  Retry
+                </button>
+                <button
+                  onClick={handleDomainSwitch}
+                  className="flex-1 px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition"
+                >
+                  Switch Domain
+                </button>
+              </div>
+              <button
+                onClick={() => setShowError(false)}
+                className="absolute top-2 right-2 text-gray-400 hover:text-white"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
