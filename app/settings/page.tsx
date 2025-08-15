@@ -8,16 +8,19 @@ import {
   EyeOff as CloakIcon,
   Rocket as LaunchIcon,
   Play as StreamingIcon,
+  Keyboard as KeyboardIcon,
 } from "lucide-react"
 import CloakSettingsPanel from "../../components/CloakSettingsPanel"
 import GameLaunchSettingsPanel from "../../components/GameLaunchSettingsPanel"
 import GeneralSettingsPanel from "../../components/GeneralSettingsPanel"
 import StreamingSettingsPanel from "../../components/StreamingSettingsPanel"
+import HotkeysSettingsPanel from "../../components/HotkeysSettingsPanel"
 
 const categories = [
   { key: "general", label: "General", icon: <SettingsIcon className="w-5 h-5" /> },
   { key: "cloak", label: "Cloak", icon: <CloakIcon className="w-5 h-5" /> },
-  { key: "hotkeys", label: "Game Launch", icon: <LaunchIcon className="w-5 h-5" /> },
+  { key: "hotkeys", label: "Hotkeys", icon: <KeyboardIcon className="w-5 h-5" /> },
+  { key: "launch", label: "Game Launch", icon: <LaunchIcon className="w-5 h-5" /> },
   { key: "streaming", label: "Streaming", icon: <StreamingIcon className="w-5 h-5" /> },
 ]
 
@@ -28,6 +31,8 @@ function CategoryOptions({ selected }: { selected: string }) {
     case "cloak":
       return <CloakSettingsPanel />
     case "hotkeys":
+      return <HotkeysSettingsPanel />
+    case "launch":
       return <GameLaunchSettingsPanel />
     case "streaming":
       return <StreamingSettingsPanel />
@@ -42,7 +47,7 @@ function SettingsContent() {
   const currentCategory = categories.find(c => c.key === selected);
 
   useEffect(() => {
-    const tabParam = searchParams.get('tab')
+    const tabParam = searchParams?.get('tab')
     if (tabParam && categories.find(cat => cat.key === tabParam)) {
       setSelected(tabParam)
     }

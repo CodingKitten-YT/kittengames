@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Loader2 } from "lucide-react"
 import { getCurrentSettings, launchGame } from "./GameLaunchSettingsPanel"
 import { findGameBySlug, type ProcessedGame } from "../utils/gamesApi"
+import { HotkeysIndicator } from "./HotkeysHelpOverlay"
 
 export default function GameFrame({ slug }: { slug: string }) {
   const [game, setGame] = useState<ProcessedGame | null>(null)
@@ -44,11 +45,18 @@ export default function GameFrame({ slug }: { slug: string }) {
     if (iframe && !isLoading) {
       const settings = getCurrentSettings();
       iframe.setAttribute('tabindex', '0');
+      
+      // Allow hotkeys to work by setting proper focus handling
+      iframe.setAttribute('allow', 'keyboard; fullscreen');
+      
       if (settings.confirmClose) {
         window.onbeforeunload = () => "Are you sure you want to close the game?";
       } else {
         window.onbeforeunload = null;
       }
+
+      // Ensure iframe can receive focus for hotkeys
+      iframe.focus();
     }
   }, [isLoading]);
 
@@ -94,6 +102,9 @@ export default function GameFrame({ slug }: { slug: string }) {
         <div className="absolute inset-0 z-40 bg-transparent pointer-events-auto" />
       )}
       
+      {/* Hotkeys indicator for games */}
+      <HotkeysIndicator />
+      
       <iframe
         id="game-iframe"
         src={game.url}
@@ -101,8 +112,9 @@ export default function GameFrame({ slug }: { slug: string }) {
         className={`w-full h-full border-0 ${isDragging ? 'pointer-events-none' : ''}`}
         allowFullScreen={true}
         tabIndex={0}
-        allow="keyboard; fullscreen"
+        allow="keyboard; fullscreen; gamepad; microphone; camera"
         loading="eager"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups"
       />
     </div>
   );
