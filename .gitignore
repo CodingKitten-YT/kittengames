@@ -139,3 +139,10 @@ dist
 .next/
 
 node_modules/@next/swc-linux-x64-gnu/next-swc.linux-x64-gnu.node
+
+# Demo games for development (don't commit test games)
+public/gf/clicker-game/
+public/gf/memory-match/
+public/gf/word-scramble/
+public/gf/number-guess/
+public/gf/games.json

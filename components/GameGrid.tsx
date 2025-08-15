@@ -8,10 +8,11 @@ import {
   Search,
   Zap,
 } from "lucide-react"
-import GameCard, { type Game } from "./GameGrid/GameCard"
+import GameCard from "./GameGrid/GameCard"
 import SectionHeader from "./GameGrid/SectionHeader"
 import { categoryIcons } from "../utils/categoryIcons"
 import { shuffleArray } from "../utils/gameUtils"
+import { fetchGames, searchGames, getGamesByCategory, type ProcessedGame } from "../utils/gamesApi"
 
 export default function GameGrid({
   onGameSelect,
@@ -22,54 +23,70 @@ export default function GameGrid({
   selectedCategory: string
   searchQuery: string
 }) {
-  const [games, setGames] = useState<Game[]>([])
+  const [games, setGames] = useState<ProcessedGame[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    async function fetchGames() {
+    async function loadGames() {
       setIsLoading(true)
+      setError(null)
+      
       try {
-        const res = await fetch("https://raw.githubusercontent.com/CodingKitten-YT/KittenGames-gamelibrary/refs/heads/main/games.json")
-        if (!res.ok) {
-          throw new Error("Failed to fetch games")
+        if (searchQuery.trim()) {
+          // If there's a search query, search for games
+          const searchResults = await searchGames(searchQuery)
+          setGames(searchResults)
+        } else if (selectedCategory !== "All") {
+          // If a specific category is selected, filter by category
+          const categoryGames = await getGamesByCategory(selectedCategory)
+          setGames(categoryGames)
+        } else {
+          // Load all games
+          const allGames = await fetchGames()
+          setGames(allGames)
         }
-        const data = await res.json()
-        
-        // Simply store the games as they are in the JSON file
-        setGames(data)
-      } catch (error) {
-        console.error("Error fetching games:", error)
+      } catch (err) {
+        console.error("Error loading games:", err)
+        setError("Failed to load games. Please try again later.")
+        setGames([])
       } finally {
         setIsLoading(false)
       }
     }
-    fetchGames()
-  }, [])
+    
+    loadGames()
+  }, [selectedCategory, searchQuery])
 
   const filteredGames = useMemo(() => {
-    return games.filter((game: Game) => {
+    return games.filter((game: ProcessedGame) => {
       const matchesCategory = selectedCategory === "All" || game.type.toLowerCase() === selectedCategory.toLowerCase()
       const matchesSearch = game.name.toLowerCase().includes(searchQuery.toLowerCase())
       return matchesCategory && matchesSearch
     })
   }, [games, selectedCategory, searchQuery])
 
-  // Get the first 10 games from the JSON file as recent games
+  // Get recent games for the "Recently Added" section
   const recentGames = useMemo(() => {
     if (searchQuery || selectedCategory !== "All") {
-      return []; // Don't show recent games when filtering
+      return [] // Don't show recent games when filtering
     }
-    return games.slice(0, 10);
-  }, [games, searchQuery, selectedCategory]);
+    // Get the first 10 games sorted by added date
+    return games
+      .sort((a, b) => new Date(b.added).getTime() - new Date(a.added).getTime())
+      .slice(0, 10)
+  }, [games, searchQuery, selectedCategory])
 
   // Get remaining games, shuffled
   const remainingGames = useMemo(() => {
     if (searchQuery || selectedCategory !== "All") {
-      return filteredGames; // When filtering, show all filtered games
+      return filteredGames // When filtering, show all filtered games
     }
-    // Exclude the first 10 games and shuffle the rest
-    return shuffleArray(games.slice(10));
-  }, [games, filteredGames, searchQuery, selectedCategory]);
+    // Exclude recent games and shuffle the rest
+    const recentGamePaths = new Set(recentGames.map(g => g.path))
+    const remaining = games.filter(g => !recentGamePaths.has(g.path))
+    return shuffleArray(remaining)
+  }, [games, recentGames, filteredGames, searchQuery, selectedCategory])
 
   // Determine which icon to use for the filtered games section
   const getFilterIcon = () => {
@@ -115,6 +132,26 @@ export default function GameGrid({
     )
   }
 
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-96 text-center">
+        <div className="p-12 rounded-3xl bg-gradient-to-br from-red-800/80 to-red-900/80 backdrop-blur-md max-w-md border border-red-700/40">
+          <div className="bg-gradient-to-r from-red-600 to-red-700 p-4 rounded-2xl w-fit mx-auto mb-6">
+            <Gamepad className="w-12 h-12 text-white" />
+          </div>
+          <h3 className="text-2xl font-bold text-white mb-3">Error Loading Games</h3>
+          <p className="text-red-200 leading-relaxed mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   if (games.length === 0) {
     return (
       <div className="flex justify-center items-center h-96 text-center">
@@ -140,7 +177,7 @@ export default function GameGrid({
             gradient={true}
           />
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-            {recentGames.map((game: Game) => (
+            {recentGames.map((game: ProcessedGame) => (
               <GameCard 
                 key={game.name} 
                 game={game}
@@ -160,7 +197,7 @@ export default function GameGrid({
         />
         {remainingGames.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-            {remainingGames.map((game: Game) => (
+            {remainingGames.map((game: ProcessedGame) => (
               <GameCard 
                 key={game.name} 
                 game={game}

@@ -7,22 +7,14 @@ import {
   ExternalLink,
 } from "lucide-react"
 import React from "react"
-import { launchGame } from "../GameLaunchSettingsPanel" // Removed getCurrentSettings as it's called within launchGame
+import { launchGame } from "../GameLaunchSettingsPanel"
 import { createEncodedGameSlug } from "../../utils/rot13"
 import { categoryIcons } from "../../utils/categoryIcons"
+import type { ProcessedGame } from "../../utils/gamesApi"
 
-interface Game {
-  name: string
-  type: string
-  image: string
-  url: string
-  newtab?: boolean
-  added?: string
-}
+const encodedSlugCache = new Map<string, string>()
 
-const encodedSlugCache = new Map<string, string>();
-
-const GameCard = memo(({ game }: { game: Game; isRecent?: boolean }) => {
+const GameCard = memo(({ game, isRecent = false }: { game: ProcessedGame; isRecent?: boolean }) => {
   const [encodedSlug, setEncodedSlug] = useState<string>('');
   const [tiltStyle, setTiltStyle] = useState({})
   const [isLoading, setIsLoading] = useState(true)
@@ -32,25 +24,23 @@ const GameCard = memo(({ game }: { game: Game; isRecent?: boolean }) => {
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true)
     if (!encodedSlug) {
-      const slug = game.name.toLowerCase().replace(/\s+/g, "-");
+      // Use the path as the primary slug, fallback to name-based slug
+      const slug = game.path || game.name.toLowerCase().replace(/\s+/g, "-")
       if (encodedSlugCache.has(slug)) {
-        setEncodedSlug(encodedSlugCache.get(slug)!);
+        setEncodedSlug(encodedSlugCache.get(slug)!)
       } else {
-        const newEncodedSlug = createEncodedGameSlug(game.name);
-        encodedSlugCache.set(slug, newEncodedSlug);
-        setEncodedSlug(newEncodedSlug);
+        const newEncodedSlug = createEncodedGameSlug(game.name)
+        encodedSlugCache.set(slug, newEncodedSlug)
+        setEncodedSlug(newEncodedSlug)
       }
     }
-  }, [game.name, encodedSlug]);
+  }, [game.name, game.path, encodedSlug])
 
   const handleClick = useCallback(() => {
-    const finalSlug = encodedSlug || createEncodedGameSlug(game.name);
-    if (game.newtab) {
-      launchGame(game.url);
-    } else {
-      window.location.href = `/play/${finalSlug}`;
-    }
-  }, [game, encodedSlug]);
+    // Create encoded slug from game name for URL routing
+    const encodedSlug = createEncodedGameSlug(game.name)
+    window.location.href = `/play/${encodedSlug}`
+  }, [game])
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const card = e.currentTarget
@@ -94,12 +84,6 @@ const GameCard = memo(({ game }: { game: Game; isRecent?: boolean }) => {
       style={tiltStyle}
       onClick={handleClick}
     >
-      {game.newtab && (
-        <div className="absolute top-2 left-2 z-10 bg-blue-600/80 p-0.5 rounded-full">
-          <ExternalLink className="w-2.5 h-2.5 text-white" />
-        </div>
-      )}
-
       <div className="relative h-full w-full rounded-xl overflow-hidden">
         {isLoading && !imageError && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-800/90 rounded-xl">

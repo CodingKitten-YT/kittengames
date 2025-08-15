@@ -1,59 +1,24 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { Loader2 } from "lucide-react"
 import { getCurrentSettings, launchGame } from "./GameLaunchSettingsPanel"
-
-interface Game {
-  name: string
-  url: string
-}
-
-// Cache for games data to avoid repeated API calls
-let gamesCache: Game[] | null = null;
-let cacheTimestamp = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+import { findGameBySlug, type ProcessedGame } from "../utils/gamesApi"
 
 export default function GameFrame({ slug }: { slug: string }) {
-  const [game, setGame] = useState<Game | null>(null)
+  const [game, setGame] = useState<ProcessedGame | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isDragging, setIsDragging] = useState(false)
-
-  // Memoize the game search to avoid unnecessary re-computations
-  const findGameInCache = useMemo(() => {
-    if (!gamesCache) return null;
-    return gamesCache.find((g: Game) => 
-      g.name.toLowerCase().replace(/\s+/g, "-") === slug
-    );
-  }, [slug]);
 
   useEffect(() => {
     async function fetchGame() {
       setIsLoading(true);
       
-      // Check if we have cached data that's still fresh
-      const now = Date.now();
-      if (gamesCache && (now - cacheTimestamp) < CACHE_DURATION) {
-        const cachedGame = findGameInCache;
-        setGame(cachedGame || null);
-        setIsLoading(false);
-        return;
-      }
-
       try {
-        const res = await fetch("https://raw.githubusercontent.com/CodingKitten-YT/KittenGames-gamelibrary/refs/heads/main/games.json");
-        const games = await res.json();
-        
-        // Update cache
-        gamesCache = games;
-        cacheTimestamp = now;
-        
-        const foundGame = games.find((g: Game) => 
-          g.name.toLowerCase().replace(/\s+/g, "-") === slug
-        );
-        setGame(foundGame || null);
+        const foundGame = await findGameBySlug(slug);
+        setGame(foundGame);
       } catch (error) {
-        console.error('Error fetching games:', error);
+        console.error('Error fetching game:', error);
         setGame(null);
       } finally {
         setIsLoading(false);
@@ -61,14 +26,14 @@ export default function GameFrame({ slug }: { slug: string }) {
     }
     
     fetchGame();
-  }, [slug, findGameInCache]);
+  }, [slug]);
 
   // Launch logic: if settings dictate about:blank or new tab, launch and return null
   useEffect(() => {
     if (game) {
       const settings = getCurrentSettings();
       if (settings.openMode === "about-blank" || settings.openMode === "new-tab") {
-        launchGame(game.url, settings);
+        launchGame(game.url);
         setGame(null);
       }
     }
