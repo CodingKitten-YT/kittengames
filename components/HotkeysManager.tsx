@@ -164,6 +164,17 @@ export default function HotkeysManager() {
         executeAction(event.data.hotkey.action, router)
         return
       }
+
+      // Handle save/load responses from iframe
+      if (event.data.type === 'kittengames-save-data') {
+        // Save data response - handled by SaveLoadModal
+        return
+      }
+
+      if (event.data.type === 'kittengames-save-error') {
+        // Save error response - handled by SaveLoadModal
+        return
+      }
     }
 
     // Listen on both document and window for maximum coverage

@@ -1,18 +1,20 @@
 "use client"
 
 import { useParams, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import GameFrame from "../../../components/GameFrame"
 import Header from "../../../components/Header"
+import SaveLoadModal from "../../../components/SaveLoadModal"
 import { decodeGameSlug } from "../../../utils/rot13"
-import { useGameLaunchSettings } from "../../../components/GameLaunchSettingsPanel" // Added import
-import { useEffect } from "react" // Added import
+import { useGameLaunchSettings } from "../../../components/GameLaunchSettingsPanel"
 
 export default function PlayGame() {
   const params = useParams()
   const router = useRouter()
-  const encodedSlug = params.slug as string
+  const encodedSlug = (params?.slug as string) || ''
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false)
   
-  const { confirmClose } = useGameLaunchSettings() // Get confirmClose setting
+  const { confirmClose } = useGameLaunchSettings()
 
   // Decode the ROT13 encoded slug to get the original game slug
   const decodedSlug = decodeGameSlug(encodedSlug)
@@ -31,6 +33,10 @@ export default function PlayGame() {
     if (document.documentElement.requestFullscreen) {
       document.documentElement.requestFullscreen()
     }
+  }
+
+  const handleSave = () => {
+    setIsSaveModalOpen(true)
   }
 
   useEffect(() => {
@@ -59,8 +65,14 @@ export default function PlayGame() {
         isCompact={true}
         onBackClick={handleBackClick}
         onFullscreen={handleFullscreen}
+        onSave={handleSave}
       />
       <GameFrame slug={decodedSlug} />
+      
+      <SaveLoadModal
+        isOpen={isSaveModalOpen}
+        onClose={() => setIsSaveModalOpen(false)}
+      />
     </div>
   )
 }

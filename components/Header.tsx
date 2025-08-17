@@ -18,6 +18,7 @@ import {
   MessageCirclePlus,
   Film,
   Gamepad,
+  Save,
 } from "lucide-react"
 
 import SearchBar from "./SearchBar"
@@ -58,6 +59,7 @@ interface HeaderProps {
   onCategoryChange?: (category: string) => void;
   onSearch?: (query: string) => void;
   onFullscreen?: () => void;
+  onSave?: () => void;
   compactNavbarConfig?: {
     backButtonMargin?: string;
     eyeOffButtonMargin?: string;
@@ -72,6 +74,7 @@ export default function Header({
   onCategoryChange,
   onSearch,
   onFullscreen,
+  onSave,
   compactNavbarConfig = {},
 }: HeaderProps) {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false)
@@ -209,7 +212,7 @@ export default function Header({
           <div className="mt-3 ml-3 bg-gray-800/80 backdrop-blur-md rounded-full px-2.5 py-1.5 flex items-center space-x-1 shadow-lg border border-gray-700/50">
             <button
               onClick={onBackClick}
-              className={`text-gray-300 w-8 h-8 flex items-center justify-center hover:bg-gray-700/70 hover:text-purple-400 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 ${backButtonMargin}`}
+              className={`text-gray-300 w-8 h-8 flex items-center justify-center hover:bg-gray-700/70 hover:text-blue-400 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 ${backButtonMargin}`}
               title="Back to games"
             >
               <ArrowLeft className="w-4 h-4" /> {/* Slightly smaller icons for smaller buttons */}
@@ -217,7 +220,7 @@ export default function Header({
 
             <button
               onClick={() => setIsTabCustomizationOpen(true)}
-              className={`text-gray-300 w-8 h-8 flex items-center justify-center hover:bg-gray-700/70 hover:text-purple-400 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 ${eyeOffButtonMargin}`}
+              className={`text-gray-300 w-8 h-8 flex items-center justify-center hover:bg-gray-700/70 hover:text-orange-400 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 ${eyeOffButtonMargin}`}
               title="Customize tab appearance"
             >
               <EyeOff className="w-4 h-4" />
@@ -230,6 +233,16 @@ export default function Header({
             >
               <Maximize2 className="w-4 h-4" />
             </button>
+
+            {onSave && (
+              <button
+                onClick={onSave}
+                className="text-gray-300 w-8 h-8 flex items-center justify-center hover:bg-gray-700/70 hover:text-green-400 rounded-full transition-all duration-200 hover:scale-105 active:scale-95"
+                title="Save/Load Game Data"
+              >
+                <Save className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 
